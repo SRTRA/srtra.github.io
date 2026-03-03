@@ -1437,6 +1437,8 @@ function createPeer(id) {
   return new Peer(id, {
     config: iceConfig,
     debug: 1,
+    // Safari braucht mehr Zeit für ICE-Gathering
+    pingInterval: 5000,
   });
 }
 
@@ -1505,7 +1507,7 @@ async function joinRoom() {
     console.log('[PeerJS Guest] My ID:', myId, '— connecting to:', code);
     setStatus('connecting', 'Verbinde mit Host...');
     state.roomId = code;
-    const conn = peer.connect(code, { reliable: true });
+    const conn = peer.connect(code, { reliable: false, serialization: 'raw' });
     peerConn = conn;
     setupPeerConnection(conn);
 
@@ -1553,7 +1555,22 @@ function setupPeerConnection(conn) {
   });
 
   conn.on('data', async data => {
-    const msg = typeof data === 'string' ? JSON.parse(data) : data;
+    // raw serialization: data kann String, ArrayBuffer oder Uint8Array sein
+    let msg;
+    try {
+      if (typeof data === 'string') {
+        msg = JSON.parse(data);
+      } else if (data instanceof ArrayBuffer) {
+        msg = JSON.parse(new TextDecoder().decode(data));
+      } else if (data instanceof Uint8Array) {
+        msg = JSON.parse(new TextDecoder().decode(data));
+      } else {
+        msg = data; // PeerJS hat bereits deserialisiert
+      }
+    } catch(e) {
+      console.warn('[PeerJS] Data parse error:', e, data);
+      return;
+    }
 
     // HOST: Stimmen-Liste für Gast bereitstellen
     if (msg.type === 'voices_request') {
