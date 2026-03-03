@@ -1197,7 +1197,7 @@ async function loadKeysFromServer() {
     }
     if (keys.localIp) {
       state.localIp = keys.localIp;
-      if (keys.meteredApiKey && keys.meteredApiKey !== state.meteredApiKey) { state.meteredApiKey = keys.meteredApiKey; _iceServersFetched = false; }
+      if (keys.meteredApiKey) { state.meteredApiKey = keys.meteredApiKey; fetchIceServers(); }
     }
     if (keys.localIp && urlParams.get('host') === 'true') {
       const port = window.location.port ? ':' + window.location.port : '';
@@ -1224,21 +1224,16 @@ loadKeysFromServer();
 function getGuestUrl(code) {
   const publicBase = document.getElementById('publicBaseUrl')?.value.trim();
   const base = publicBase || (window.location.href.split('?')[0]);
-  const params = new URLSearchParams({ join: code });
-  // Metered-Key mitgeben damit Gast eigene TURN-Kandidaten generieren kann
-  // (kein Google/Groq-Key — Gast nutzt Host-Proxy dafür)
-  if (state.meteredApiKey) params.set('meteredkey', state.meteredApiKey);
-  return base + '?' + params.toString();
+  // Nur Raum-Code — kein API-Key (Gast nutzt Host als Proxy)
+  return base + '?join=' + code;
 }
 
 function getLocalGuestUrl(code) {
   if (!state.localIp) return null;
   const port = window.location.port ? ':' + window.location.port : ':3000';
   const base = window.location.protocol + '//' + state.localIp + port + window.location.pathname;
-  // Metered-Key mitgeben damit Gast TURN-Kandidaten generieren kann
-  const params = new URLSearchParams({ join: code });
-  if (state.meteredApiKey) params.set('meteredkey', state.meteredApiKey);
-  return base + '?' + params.toString();
+  // Kein API-Key in der lokalen URL — der Gast lädt keys.json direkt vom lokalen Server
+  return base + '?join=' + code;
 }
 
 function savePublicBaseUrl() {
@@ -1331,15 +1326,15 @@ function copyGuestUrl(btn) {
 // Auto-Join wenn URL ?join=CODE enthält
 (function() {
   const params = new URLSearchParams(window.location.search);
-  // Metered-Key aus URL laden (vom Host mitgegeben)
+  // Metered-Key aus URL laden (vom Host mitgegeben für TURN)
   const meteredKeyFromUrl = params.get('meteredkey');
   if (meteredKeyFromUrl) {
     state.meteredApiKey = meteredKeyFromUrl;
-    _iceServersFetched = false; // Key neu gesetzt → nächster fetchIceServers-Aufruf holt neue Server
+    _iceServersFetched = false;
   }
   const joinCode = params.get('join');
   if (joinCode) {
-    setTimeout(() => {
+    window.addEventListener('load', () => {
       // Gast-Tab aktivieren
       document.querySelectorAll('.signal-tab').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(p => p.classList.remove('active'));
@@ -1350,15 +1345,9 @@ function copyGuestUrl(btn) {
       const input = document.getElementById('guestCodeInput');
       if (input) {
         input.value = joinCode;
-        // Code ist vorausgefüllt — User muss Beitreten-Button drücken (User-Geste nötig)
-        // Button animieren damit klar ist was zu tun ist
-        const btn = document.querySelector('[onclick="joinRoom()"]');
-        if (btn) {
-          btn.style.animation = 'pulse-btn 1s ease infinite';
-          btn.textContent = '🚪 Beitreten';
-        }
+        joinRoom(); // async — lädt TURN-Server und verbindet
       }
-    }, 100);
+    });
   }
 })();
 
@@ -1397,57 +1386,36 @@ const iceConfigFallback = {
 let iceConfig = iceConfigFallback;
 
 // Metered.ca API — liefert frische, authentifizierte TURN-Credentials
-let _iceServersFetched = false;
-let _iceServersFetching = null;
-
+// Kostenloser Plan: 50GB/Monat, weltweit verteilt, sehr zuverlässig
 async function fetchIceServers() {
-  if (_iceServersFetched) return;
-  if (_iceServersFetching) return _iceServersFetching;
-
-  const apiKey = state.meteredApiKey || localStorage.getItem('lt_metered_apikey') || '';
-  if (!apiKey) {
-    console.log('[ICE] Kein Metered API-Key -- nutze Fallback TURN-Server');
-    _iceServersFetched = true;
-    return;
-  }
-
-  _iceServersFetching = (async () => {
-    try {
-      const resp = await fetch(
-        'https://ebblo.metered.live/api/v1/turn/credentials?apiKey=' + encodeURIComponent(apiKey)
-      );
-      if (!resp.ok) throw new Error('HTTP ' + resp.status);
-      const servers = await resp.json();
-      if (Array.isArray(servers) && servers.length > 0) {
-        iceConfig = { iceServers: servers, iceCandidatePoolSize: 4, iceTransportPolicy: 'all' };
-        console.log('[ICE] Metered TURN-Server geladen:', servers.length, 'Server');
-        _iceServersFetched = true; // Nur bei Erfolg merken
-      }
-    } catch(e) {
-      console.warn('[ICE] Metered-Abruf fehlgeschlagen, nutze Fallback:', e.message);
-      // _iceServersFetched bleibt false → nächster Versuch möglich
-    } finally {
-      _iceServersFetching = null;
+  try {
+    const resp = await fetch(
+      'https://ebblo.metered.live/api/v1/turn/credentials?apiKey=bc1c65c5a04e1c8c84b8c9ec6b9f02f5f9bd'
+    );
+    if (!resp.ok) throw new Error('HTTP ' + resp.status);
+    const servers = await resp.json();
+    if (Array.isArray(servers) && servers.length > 0) {
+      iceConfig = { iceServers: servers, iceCandidatePoolSize: 4, iceTransportPolicy: 'all' };
+      console.log('[ICE] Metered TURN-Server geladen:', servers.length, 'Server');
     }
-  })();
-  return _iceServersFetching;
+  } catch(e) {
+    console.warn('[ICE] Metered-Abruf fehlgeschlagen, nutze Fallback:', e.message);
+  }
 }
+// Sofort laden
+fetchIceServers();
 
 function createPeer(id) {
   return new Peer(id, {
     config: iceConfig,
     debug: 1,
-    // Safari braucht mehr Zeit für ICE-Gathering
-    pingInterval: 5000,
   });
 }
 
-async function createRoom() {
-  unlockAudio();
+function createRoom() {
+  unlockAudio(); // Sofort bei User-Geste aufrufen
   collectSettings();
   if (peer) { peer.destroy(); peer = null; }
-  await fetchIceServers();
-  console.log('[ICE] Server:', iceConfig.iceServers.length, 'TURN/STUN entries');
 
   // Generiere kurzen 6-Zeichen Code der direkt als Peer-ID verwendet wird
   const roomCode = Math.random().toString(36).slice(2, 8);
@@ -1476,14 +1444,12 @@ async function createRoom() {
   });
 }
 
-async function joinRoom() {
+function joinRoom() {
   state.isGuest = true;
   unlockAudio();
   collectSettings();
   const code = document.getElementById('guestCodeInput').value.trim().toLowerCase();
   if (!code) { alert('Bitte den Raum-Code eingeben.'); return; }
-  await fetchIceServers();
-  console.log('[ICE] Server:', iceConfig.iceServers.length, 'TURN/STUN entries');
   if (peer) { peer.destroy(); peer = null; }
 
   const errEl = document.getElementById('joinErrorMsg');
@@ -1507,7 +1473,7 @@ async function joinRoom() {
     console.log('[PeerJS Guest] My ID:', myId, '— connecting to:', code);
     setStatus('connecting', 'Verbinde mit Host...');
     state.roomId = code;
-    const conn = peer.connect(code, { reliable: false, serialization: 'raw' });
+    const conn = peer.connect(code, { reliable: true });
     peerConn = conn;
     setupPeerConnection(conn);
 
@@ -1555,22 +1521,7 @@ function setupPeerConnection(conn) {
   });
 
   conn.on('data', async data => {
-    // raw serialization: data kann String, ArrayBuffer oder Uint8Array sein
-    let msg;
-    try {
-      if (typeof data === 'string') {
-        msg = JSON.parse(data);
-      } else if (data instanceof ArrayBuffer) {
-        msg = JSON.parse(new TextDecoder().decode(data));
-      } else if (data instanceof Uint8Array) {
-        msg = JSON.parse(new TextDecoder().decode(data));
-      } else {
-        msg = data; // PeerJS hat bereits deserialisiert
-      }
-    } catch(e) {
-      console.warn('[PeerJS] Data parse error:', e, data);
-      return;
-    }
+    const msg = typeof data === 'string' ? JSON.parse(data) : data;
 
     // HOST: Stimmen-Liste für Gast bereitstellen
     if (msg.type === 'voices_request') {
@@ -1746,16 +1697,6 @@ function setupPeerConnection(conn) {
       console.log('[ICE]', conn.peerConnection.iceConnectionState);
     conn.peerConnection.onconnectionstatechange = () =>
       console.log('[RTCPeer]', conn.peerConnection.connectionState);
-    conn.peerConnection.onicecandidateerror = (e) =>
-      console.warn('[ICE Error]', e.errorCode, e.errorText, e.url);
-    conn.peerConnection.onicecandidate = (e) => {
-      if (e.candidate) {
-        const t = e.candidate.type || e.candidate.candidate.match(/typ (\w+)/)?.[1];
-        console.log('[ICE Candidate]', t, e.candidate.candidate.substring(0,80));
-      } else {
-        console.log('[ICE] Gathering complete');
-      }
-    };
   }
 }
 
