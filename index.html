@@ -176,6 +176,11 @@
 
   .btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none !important; }
 
+  @keyframes pulse-btn {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(124,111,255,0.5); transform: scale(1); }
+    50% { box-shadow: 0 0 0 8px rgba(124,111,255,0); transform: scale(1.04); }
+  }
+
   .step-row {
     display: flex;
     gap: 1rem;
@@ -830,9 +835,15 @@
                     <span id="guestUrlLocalText" style="color:var(--accent);">—</span>
                   </div>
                 </div>
-                <div>
-                  <div id="hostQrCode" style="background:white;padding:8px;border-radius:10px;flex-shrink:0;"></div>
-                  <p style="font-size:0.62rem;font-family:'DM Mono',monospace;color:var(--text-dimmer);text-align:center;margin-top:0.3rem;">📱 QR-Code scannen</p>
+                <div style="display:flex;gap:1rem;flex-wrap:wrap;">
+                  <div style="text-align:center;">
+                    <div id="hostQrCode" style="background:white;padding:8px;border-radius:10px;"></div>
+                    <p style="font-size:0.62rem;font-family:'DM Mono',monospace;color:var(--accent3);margin-top:0.3rem;">🌐 Extern</p>
+                  </div>
+                  <div id="hostQrCodeLocal" style="display:none;text-align:center;">
+                    <div id="hostQrCodeLocalInner" style="background:white;padding:8px;border-radius:10px;"></div>
+                    <p style="font-size:0.62rem;font-family:'DM Mono',monospace;color:var(--accent);margin-top:0.3rem;">🏠 Lokal</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -847,6 +858,7 @@
                 onkeydown="if(event.key==='Enter') joinRoom()" />
               <button class="btn btn-primary" onclick="joinRoom()">🚪 Beitreten</button>
             </div>
+            <div id="joinErrorMsg" style="display:none;margin-top:0.75rem;font-size:0.75rem;font-family:'DM Mono',monospace;color:#ff6b6b;background:rgba(255,107,107,0.08);border:1px solid rgba(255,107,107,0.25);border-radius:8px;padding:0.5rem 0.75rem;white-space:pre-line;"></div>
           </div>
 
 
@@ -1142,6 +1154,7 @@ let state = {
   selectedVoiceName: '',
   selectedVoiceByLang: {},
   groqApiKey: localStorage.getItem('lt_groq_apikey') || '',
+  meteredApiKey: '',
   localIp: '',
   translateEngine: 'google',
   conversationHistory: [], // für Groq Gesprächskontext
@@ -1184,6 +1197,7 @@ async function loadKeysFromServer() {
     }
     if (keys.localIp) {
       state.localIp = keys.localIp;
+      if (keys.meteredApiKey && keys.meteredApiKey !== state.meteredApiKey) { state.meteredApiKey = keys.meteredApiKey; _iceServersFetched = false; }
     }
     if (keys.localIp && urlParams.get('host') === 'true') {
       const port = window.location.port ? ':' + window.location.port : '';
@@ -1210,16 +1224,21 @@ loadKeysFromServer();
 function getGuestUrl(code) {
   const publicBase = document.getElementById('publicBaseUrl')?.value.trim();
   const base = publicBase || (window.location.href.split('?')[0]);
-  // Nur Raum-Code — kein API-Key (Gast nutzt Host als Proxy)
-  return base + '?join=' + code;
+  const params = new URLSearchParams({ join: code });
+  // Metered-Key mitgeben damit Gast eigene TURN-Kandidaten generieren kann
+  // (kein Google/Groq-Key — Gast nutzt Host-Proxy dafür)
+  if (state.meteredApiKey) params.set('meteredkey', state.meteredApiKey);
+  return base + '?' + params.toString();
 }
 
 function getLocalGuestUrl(code) {
   if (!state.localIp) return null;
   const port = window.location.port ? ':' + window.location.port : ':3000';
   const base = window.location.protocol + '//' + state.localIp + port + window.location.pathname;
-  // Kein API-Key in der lokalen URL — der Gast lädt keys.json direkt vom lokalen Server
-  return base + '?join=' + code;
+  // Metered-Key mitgeben damit Gast TURN-Kandidaten generieren kann
+  const params = new URLSearchParams({ join: code });
+  if (state.meteredApiKey) params.set('meteredkey', state.meteredApiKey);
+  return base + '?' + params.toString();
 }
 
 function savePublicBaseUrl() {
@@ -1270,13 +1289,25 @@ function updateQrCode() {
     }
   }
 
-  qrContainer.innerHTML = '';
-  new QRCode(qrContainer, {
-    text: fullUrl,
-    width: 160, height: 160,
-    colorDark: '#000000', colorLight: '#ffffff',
-    correctLevel: QRCode.CorrectLevel.M
-  });
+  // Externer QR (nur wenn publicBaseUrl gesetzt)
+  const publicBaseCheck = document.getElementById('publicBaseUrl')?.value.trim();
+  if (publicBaseCheck && fullUrl) {
+    qrContainer.innerHTML = '';
+    new QRCode(qrContainer, { text: fullUrl, width: 160, height: 160, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+  } else {
+    qrContainer.innerHTML = '';
+  }
+
+  // Lokaler QR
+  const localQrWrapper = document.getElementById('hostQrCodeLocal');
+  const localQrContainer = document.getElementById('hostQrCodeLocalInner');
+  if (localUrl && localQrContainer) {
+    localQrContainer.innerHTML = '';
+    new QRCode(localQrContainer, { text: localUrl, width: 160, height: 160, colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+    if (localQrWrapper) localQrWrapper.style.display = 'block';
+  } else if (localQrWrapper) {
+    localQrWrapper.style.display = 'none';
+  }
 }
 
 function copyUrl(btn, elementId) {
@@ -1300,10 +1331,14 @@ function copyGuestUrl(btn) {
 // Auto-Join wenn URL ?join=CODE enthält
 (function() {
   const params = new URLSearchParams(window.location.search);
+  // Metered-Key aus URL laden (vom Host mitgegeben)
+  const meteredKeyFromUrl = params.get('meteredkey');
+  if (meteredKeyFromUrl) {
+    state.meteredApiKey = meteredKeyFromUrl;
+    _iceServersFetched = false; // Key neu gesetzt → nächster fetchIceServers-Aufruf holt neue Server
+  }
   const joinCode = params.get('join');
   if (joinCode) {
-    // Auf Gast-Tab wechseln und Code einfügen
-    window.addEventListener('DOMContentLoaded', () => {}, { once: true });
     setTimeout(() => {
       // Gast-Tab aktivieren
       document.querySelectorAll('.signal-tab').forEach(b => b.classList.remove('active'));
@@ -1315,8 +1350,13 @@ function copyGuestUrl(btn) {
       const input = document.getElementById('guestCodeInput');
       if (input) {
         input.value = joinCode;
-        // Settings müssen geladen sein bevor joinRoom aufgerufen wird
-        setTimeout(() => joinRoom(), 300);
+        // Code ist vorausgefüllt — User muss Beitreten-Button drücken (User-Geste nötig)
+        // Button animieren damit klar ist was zu tun ist
+        const btn = document.querySelector('[onclick="joinRoom()"]');
+        if (btn) {
+          btn.style.animation = 'pulse-btn 1s ease infinite';
+          btn.textContent = '🚪 Beitreten';
+        }
       }
     }, 100);
   }
@@ -1339,35 +1379,73 @@ function setMode(mode, btn) {
 let peer = null;
 let peerConn = null;
 
-// Zuverlässige TURN-Server für externe Verbindungen (verschiedene Netzwerke)
-const iceConfig = {
+// TURN-Server — werden dynamisch geladen (fetchIceServers)
+// Fallback-Konfiguration falls kein dynamischer Abruf
+const iceConfigFallback = {
   iceServers: [
     { urls: 'stun:stun.l.google.com:19302' },
     { urls: 'stun:stun1.l.google.com:19302' },
-    // Metered.ca — kostenlose TURN-Server, unterstützen TCP+UDP auf Port 80/443
-    { urls: 'turn:openrelay.metered.ca:80',              username: 'openrelayproject', credential: 'openrelayproject' },
-    { urls: 'turn:openrelay.metered.ca:80?transport=udp', username: 'openrelayproject', credential: 'openrelayproject' },
-    { urls: 'turn:openrelay.metered.ca:443',             username: 'openrelayproject', credential: 'openrelayproject' },
-    { urls: 'turns:openrelay.metered.ca:443',            username: 'openrelayproject', credential: 'openrelayproject' },
-    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
-    // Cloudflare STUN
     { urls: 'stun:stun.cloudflare.com:3478' },
+    { urls: 'turn:openrelay.metered.ca:443?transport=tcp', username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turns:openrelay.metered.ca:443',              username: 'openrelayproject', credential: 'openrelayproject' },
+    { urls: 'turn:freeturn.net:3478',   username: 'free', credential: 'free' },
+    { urls: 'turns:freeturn.net:5349',  username: 'free', credential: 'free' },
   ],
-  iceCandidatePoolSize: 10,
+  iceCandidatePoolSize: 4,
+  iceTransportPolicy: 'all',
 };
+let iceConfig = iceConfigFallback;
+
+// Metered.ca API — liefert frische, authentifizierte TURN-Credentials
+let _iceServersFetched = false;
+let _iceServersFetching = null;
+
+async function fetchIceServers() {
+  if (_iceServersFetched) return;
+  if (_iceServersFetching) return _iceServersFetching;
+
+  const apiKey = state.meteredApiKey || localStorage.getItem('lt_metered_apikey') || '';
+  if (!apiKey) {
+    console.log('[ICE] Kein Metered API-Key -- nutze Fallback TURN-Server');
+    _iceServersFetched = true;
+    return;
+  }
+
+  _iceServersFetching = (async () => {
+    try {
+      const resp = await fetch(
+        'https://ebblo.metered.live/api/v1/turn/credentials?apiKey=' + encodeURIComponent(apiKey)
+      );
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const servers = await resp.json();
+      if (Array.isArray(servers) && servers.length > 0) {
+        iceConfig = { iceServers: servers, iceCandidatePoolSize: 4, iceTransportPolicy: 'all' };
+        console.log('[ICE] Metered TURN-Server geladen:', servers.length, 'Server');
+        _iceServersFetched = true; // Nur bei Erfolg merken
+      }
+    } catch(e) {
+      console.warn('[ICE] Metered-Abruf fehlgeschlagen, nutze Fallback:', e.message);
+      // _iceServersFetched bleibt false → nächster Versuch möglich
+    } finally {
+      _iceServersFetching = null;
+    }
+  })();
+  return _iceServersFetching;
+}
 
 function createPeer(id) {
   return new Peer(id, {
     config: iceConfig,
-    // PeerJS debug level: 0=none, 1=errors, 2=warnings, 3=all
     debug: 1,
   });
 }
 
-function createRoom() {
-  unlockAudio(); // Sofort bei User-Geste aufrufen
+async function createRoom() {
+  unlockAudio();
   collectSettings();
   if (peer) { peer.destroy(); peer = null; }
+  await fetchIceServers();
+  console.log('[ICE] Server:', iceConfig.iceServers.length, 'TURN/STUN entries');
 
   // Generiere kurzen 6-Zeichen Code der direkt als Peer-ID verwendet wird
   const roomCode = Math.random().toString(36).slice(2, 8);
@@ -1396,35 +1474,63 @@ function createRoom() {
   });
 }
 
-function joinRoom() {
+async function joinRoom() {
   state.isGuest = true;
-  unlockAudio(); // Sofort bei User-Geste (Klick auf Beitreten) aufrufen
+  unlockAudio();
   collectSettings();
   const code = document.getElementById('guestCodeInput').value.trim().toLowerCase();
-  if (!code) {
-    alert('Bitte den Raum-Code eingeben.');
-    return;
-  }
+  if (!code) { alert('Bitte den Raum-Code eingeben.'); return; }
+  await fetchIceServers();
+  console.log('[ICE] Server:', iceConfig.iceServers.length, 'TURN/STUN entries');
   if (peer) { peer.destroy(); peer = null; }
+
+  const errEl = document.getElementById('joinErrorMsg');
+  if (errEl) errEl.style.display = 'none';
+  setStatus('connecting', 'Verbinde mit Server...');
+
+  // Timeout falls PeerJS-Server nicht erreichbar (Safari/iOS Netzwerkprobleme)
+  const connectTimeout = setTimeout(() => {
+    if (!peerConn) {
+      setStatus('error', 'Timeout — Server nicht erreichbar');
+      document.getElementById('joinErrorMsg').textContent =
+        'Verbindung zum Server fehlgeschlagen. Bitte prüfe:\n• Internetverbindung aktiv?\n• Seite neu laden und nochmals versuchen';
+      document.getElementById('joinErrorMsg').style.display = 'block';
+    }
+  }, 12000);
 
   peer = createPeer(undefined);
 
-  setStatus('connecting', 'Verbinde...');
-
-  // Try to find host peer by short code — PeerJS doesn't support lookup,
-  // so we need the full peer ID. We use the code as the actual peer ID directly.
   peer.on('open', myId => {
+    clearTimeout(connectTimeout);
     console.log('[PeerJS Guest] My ID:', myId, '— connecting to:', code);
+    setStatus('connecting', 'Verbinde mit Host...');
     state.roomId = code;
     const conn = peer.connect(code, { reliable: true });
     peerConn = conn;
     setupPeerConnection(conn);
+
+    // Timeout falls Host nicht antwortet
+    setTimeout(() => {
+      if (conn.open === false || !state.dataChannel) {
+        setStatus('error', 'Host nicht erreichbar');
+        document.getElementById('joinErrorMsg').textContent =
+          'Host antwortet nicht. Ist der Code korrekt und der Host aktiv?';
+        document.getElementById('joinErrorMsg').style.display = 'block';
+      }
+    }, 15000);
   });
 
   peer.on('error', e => {
+    clearTimeout(connectTimeout);
     console.log('[PeerJS Guest] Error:', e.type, e);
-    setStatus('error', 'Verbindungsfehler: ' + e.type);
-    alert('Verbindung fehlgeschlagen. Ist der Code korrekt?');
+    const msg = e.type === 'peer-unavailable'
+      ? 'Raum nicht gefunden. Ist der Code korrekt?'
+      : e.type === 'network' || e.type === 'server-error'
+        ? 'Netzwerkfehler. Seite neu laden und nochmals versuchen.'
+        : 'Verbindungsfehler: ' + e.type;
+    setStatus('error', msg);
+    document.getElementById('joinErrorMsg').textContent = msg;
+    document.getElementById('joinErrorMsg').style.display = 'block';
   });
 }
 
@@ -1623,6 +1729,16 @@ function setupPeerConnection(conn) {
       console.log('[ICE]', conn.peerConnection.iceConnectionState);
     conn.peerConnection.onconnectionstatechange = () =>
       console.log('[RTCPeer]', conn.peerConnection.connectionState);
+    conn.peerConnection.onicecandidateerror = (e) =>
+      console.warn('[ICE Error]', e.errorCode, e.errorText, e.url);
+    conn.peerConnection.onicecandidate = (e) => {
+      if (e.candidate) {
+        const t = e.candidate.type || e.candidate.candidate.match(/typ (\w+)/)?.[1];
+        console.log('[ICE Candidate]', t, e.candidate.candidate.substring(0,80));
+      } else {
+        console.log('[ICE] Gathering complete');
+      }
+    };
   }
 }
 
