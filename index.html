@@ -1261,32 +1261,26 @@ loadKeysFromServer();
 function getGuestUrl(code) {
   const publicBase = document.getElementById('publicBaseUrl')?.value.trim();
   const base = publicBase || (window.location.href.split('?')[0]);
-  // Nur Raum-Code — kein API-Key (Gast nutzt Host als Proxy)
-  return base + '?join=' + code;
+  const params = new URLSearchParams({ join: code });
+  // Metered-Key mitgeben: Gast braucht TURN-Server für NAT-Traversal über Internet
+  if (state.meteredApiKey) params.set('meteredkey', state.meteredApiKey);
+  return base + '?' + params.toString();
 }
 
 function getLocalGuestUrl(code) {
   if (!state.localIp) return null;
-  // HTTPS (Port 3443) bevorzugen wenn vorhanden — nötig für Mikrofon auf Gast
-  // Aktuelle Seite auf HTTPS? Dann gleichen Port nutzen
+  // Lokale URL: kein Metered-Key nötig — im LAN keine TURN-Server erforderlich
   const isHttps = window.location.protocol === 'https:';
-  const port = isHttps
-    ? (':' + (window.location.port || '3443'))
-    : ':3000';
+  const port = isHttps ? (':' + (window.location.port || '3443')) : ':3000';
   const protocol = isHttps ? 'https:' : 'http:';
   const base = protocol + '//' + state.localIp + port + window.location.pathname;
-  const params = new URLSearchParams({ join: code });
-  if (state.meteredApiKey) params.set('meteredkey', state.meteredApiKey);
-  return base + '?' + params.toString();
+  return base + '?join=' + code;
 }
 
 function getLocalGuestUrlHttps(code) {
-  // Immer HTTPS URL (Port 3443) — für Mikrofon-Zugriff auf Gast
   if (!state.localIp) return null;
   const base = 'https://' + state.localIp + ':3443' + window.location.pathname;
-  const params = new URLSearchParams({ join: code });
-  if (state.meteredApiKey) params.set('meteredkey', state.meteredApiKey);
-  return base + '?' + params.toString();
+  return base + '?join=' + code;
 }
 
 function savePublicBaseUrl() {
@@ -1543,7 +1537,7 @@ function joinRoom() {
     console.log('[PeerJS Guest] My ID:', myId, '— connecting to:', code);
     setStatus('connecting', 'Verbinde mit Host...');
     state.roomId = code;
-    const conn = peer.connect(code, { reliable: true });
+    const conn = peer.connect(code, { reliable: false, serialization: 'raw' });
     peerConn = conn;
     setupPeerConnection(conn);
 
@@ -1562,7 +1556,8 @@ function joinRoom() {
     clearTimeout(connectTimeout);
     console.log('[PeerJS Guest] Error:', e.type, e);
     const msg = e.type === 'peer-unavailable'
-      ? 'Raum nicht gefunden. Ist der Code korrekt?'
+      ? 'Raum nicht gefunden. Ist der Code korrekt?
+(Host muss aktiv sein)'
       : e.type === 'network' || e.type === 'server-error'
         ? 'Netzwerkfehler. Seite neu laden und nochmals versuchen.'
         : 'Verbindungsfehler: ' + e.type;
