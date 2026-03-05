@@ -1556,8 +1556,7 @@ function joinRoom() {
     clearTimeout(connectTimeout);
     console.log('[PeerJS Guest] Error:', e.type, e);
     const msg = e.type === 'peer-unavailable'
-      ? 'Raum nicht gefunden. Ist der Code korrekt?
-(Host muss aktiv sein)'
+      ? 'Raum nicht gefunden. Ist der Code korrekt?\n(Host muss aktiv sein)'
       : e.type === 'network' || e.type === 'server-error'
         ? 'Netzwerkfehler. Seite neu laden und nochmals versuchen.'
         : 'Verbindungsfehler: ' + e.type;
