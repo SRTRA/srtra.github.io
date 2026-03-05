@@ -823,16 +823,26 @@
                   <div id="guestUrlFull" style="margin-top:0.6rem;font-size:0.65rem;font-family:'DM Mono',monospace;color:var(--text-dimmer);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:0.35rem 0.6rem;word-break:break-all;display:none;">
                     <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;">
                       <span style="color:var(--text-dim);white-space:nowrap;">🌐 Extern:</span>
+                      <button onclick="window.open(document.getElementById('guestUrlFullText').textContent,'_blank')" style="flex-shrink:0;background:transparent;border:none;cursor:pointer;color:var(--accent3);font-size:0.95rem;padding:0.1rem 0.3rem;" title="Im Browser öffnen">↗</button>
                       <button onclick="copyUrl(this, 'guestUrlFullText')" style="flex-shrink:0;background:transparent;border:none;cursor:pointer;color:var(--text-dim);font-size:0.8rem;padding:0.1rem 0.3rem;" title="Kopieren">📋</button>
                     </div>
                     <span id="guestUrlFullText" style="color:var(--accent3);">—</span>
                   </div>
                   <div id="guestUrlLocal" style="margin-top:0.4rem;font-size:0.65rem;font-family:'DM Mono',monospace;color:var(--text-dimmer);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:0.35rem 0.6rem;word-break:break-all;display:none;">
                     <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;">
-                      <span style="color:var(--text-dim);white-space:nowrap;">🏠 Lokal:</span>
+                      <span id="guestUrlLocalLabel" style="color:var(--text-dim);white-space:nowrap;">🏠 Lokal:</span>
+                      <button onclick="window.open(document.getElementById('guestUrlLocalText').textContent,'_blank')" style="flex-shrink:0;background:transparent;border:none;cursor:pointer;color:var(--accent);font-size:0.95rem;padding:0.1rem 0.3rem;" title="Im Browser öffnen">↗</button>
                       <button onclick="copyUrl(this, 'guestUrlLocalText')" style="flex-shrink:0;background:transparent;border:none;cursor:pointer;color:var(--text-dim);font-size:0.8rem;padding:0.1rem 0.3rem;" title="Kopieren">📋</button>
                     </div>
                     <span id="guestUrlLocalText" style="color:var(--accent);">—</span>
+                  </div>
+                  <div id="guestUrlLocalHttp" style="margin-top:0.3rem;font-size:0.62rem;font-family:'DM Mono',monospace;color:var(--text-dimmer);background:var(--surface2);border:1px dashed var(--border);border-radius:6px;padding:0.3rem 0.6rem;word-break:break-all;display:none;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;">
+                      <span style="color:var(--text-dimmer);white-space:nowrap;">🏠 HTTP (kein Mic):</span>
+                      <button onclick="window.open(document.getElementById('guestUrlLocalHttpText').textContent,'_blank')" style="flex-shrink:0;background:transparent;border:none;cursor:pointer;color:var(--text-dim);font-size:0.9rem;padding:0.1rem 0.3rem;">↗</button>
+                      <button onclick="copyUrl(this, 'guestUrlLocalHttpText')" style="flex-shrink:0;background:transparent;border:none;cursor:pointer;color:var(--text-dim);font-size:0.8rem;padding:0.1rem 0.3rem;">📋</button>
+                    </div>
+                    <span id="guestUrlLocalHttpText" style="color:var(--text-dimmer);">—</span>
                   </div>
                 </div>
                 <div style="display:flex;gap:1rem;flex-wrap:wrap;">
@@ -868,6 +878,14 @@
     </div>
   </div>
 
+  <!-- TAP-TO-JOIN OVERLAY — User-Gesture für Audio + Verbindungsaufbau -->
+  <div id="tapToJoinOverlay" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(10,10,15,0.97);align-items:center;justify-content:center;flex-direction:column;gap:1.2rem;">
+    <div style="font-size:3rem;">🎧</div>
+    <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;color:white;text-align:center;">LiveTranslate</div>
+    <div style="font-family:'DM Mono',monospace;font-size:0.85rem;color:var(--text-dim);text-align:center;">Tippen um beizutreten und Audio zu aktivieren</div>
+    <button onclick="tapToJoin()" style="background:linear-gradient(135deg,var(--accent),#5a4fff);color:white;border:none;border-radius:14px;padding:1rem 3rem;font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;cursor:pointer;box-shadow:0 8px 32px rgba(124,111,255,0.5);margin-top:0.5rem;">▶ Beitreten</button>
+  </div>
+
   <!-- AUDIO UNLOCK OVERLAY (für Gast nach Auto-Join) -->
   <div id="audioUnlockOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(10,10,15,0.92);align-items:center;justify-content:center;flex-direction:column;gap:1rem;">
     <div style="font-size:2rem;">🔊</div>
@@ -890,7 +908,7 @@
       <div style="margin-left:auto;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
         <label title="Wartezeit nach dem letzten erkannten Wort, bevor der Satz zur Übersetzung gesendet wird. Kürzere Werte reagieren schneller, können aber Sätze zu früh abschneiden. Standard: 300 ms." style="display:flex;align-items:center;gap:0.3rem;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text-dim);white-space:nowrap;">
           Debounce
-          <input type="number" id="debounceMs" value="300" min="100" max="2000" step="50" onchange="state.debounceMs=parseInt(this.value)||300;" style="width:54px;padding:0.2rem 0.35rem;font-size:0.75rem;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;" />
+          <input type="number" id="debounceMs" value="1000" min="100" max="2000" step="50" onchange="state.debounceMs=parseInt(this.value)||1000;" style="width:54px;padding:0.2rem 0.35rem;font-size:0.75rem;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;" />
           ms
         </label>
         <label title="Übersetzung und Sprachausgabe starten bereits während des Sprechens, ohne auf das Satzende zu warten. Reduziert die wahrgenommene Verzögerung," style="display:flex;align-items:center;gap:0.3rem;cursor:pointer;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text-dim);white-space:nowrap;">
@@ -906,7 +924,7 @@
           <input type="checkbox" id="qualityEval" checked onchange="updateQualityPanel()" style="width:14px;height:14px;accent-color:var(--warning);cursor:pointer;" />
           Qualitätsbewertung
         </label>
-        <select id="translateEngine" onchange="updateInterimUI();state.translateEngine=this.value;" title="Übersetzungs-Engine" style="padding:0.35rem 0.5rem;font-size:0.75rem;width:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);">
+        <select id="translateEngine" onchange="updateInterimUI();state.translateEngine=this.value;localStorage.setItem('lt_translate_engine',this.value);" title="Übersetzungs-Engine" style="padding:0.35rem 0.5rem;font-size:0.75rem;width:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);">
           <option value="google" title="Mechanisch exakt, ~50ms. Empfohlen für Echtzeit.">🔵 Google</option>
           <option value="groq" title="Dolmetscher-Stil, Gesprächskontext-bewusst, ~200–400ms.">🟣 Groq AI</option>
         </select>
@@ -964,10 +982,29 @@
               rows="1"
               oninput="onTextInput(this)"
               onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendTextInput();}"></textarea>
+            <button onclick="clearTextInput()" title="Löschen" id="textInputClearBtn" style="flex-shrink:0;width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);cursor:pointer;font-size:0.9rem;display:none;align-items:center;justify-content:center;">✕</button>
             <button onclick="sendTextInput()" title="Senden (Enter)"
               style="flex-shrink:0;width:34px;height:34px;border-radius:8px;border:none;background:var(--accent);color:white;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all 0.2s;"
               onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">↵</button>
           </div>
+
+          <!-- Typewriter-Eingabe -->
+          <div style="border-top:1px solid var(--border);padding-top:0.5rem;display:flex;flex-direction:column;gap:0.4rem;">
+            <textarea id="typewriterSource" placeholder="Typewriter-Text hier eingeben…"
+              style="flex:1;resize:none;min-height:52px;max-height:160px;overflow-y:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:0.5rem 0.75rem;font-family:'DM Mono',monospace;font-size:0.82rem;line-height:1.4;outline:none;"
+              rows="2"></textarea>
+            <div style="display:flex;align-items:center;gap:0.5rem;">
+              <button id="typewriterPlayBtn" onclick="toggleTypewriter()"
+                style="flex-shrink:0;width:34px;height:34px;border-radius:8px;border:none;background:var(--accent3);color:white;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">▶</button>
+              <input type="range" id="typewriterSpeed" min="1" max="20" value="5"
+                title="Tipp-Geschwindigkeit (Zeichen pro Sekunde)"
+                style="flex:1;accent-color:var(--accent3);cursor:pointer;"
+                oninput="document.getElementById('typewriterSpeedVal').textContent=this.value">
+              <span id="typewriterSpeedVal" style="font-family:'DM Mono',monospace;font-size:0.72rem;color:var(--text-dim);min-width:2rem;text-align:right;">5</span>
+              <span style="font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--text-dimmer);">Z/s</span>
+            </div>
+          </div>
+
         </div>
       </div>
 
@@ -1141,7 +1178,7 @@ let state = {
   myLang: 'auto',
   targetLang: 'en',
   ttsQuality: 'neural2',
-  debounceMs: 300,
+  debounceMs: 1000,
   interimMode: true,
   interimWordCount: 5,
   mode: 'host',
@@ -1156,7 +1193,7 @@ let state = {
   groqApiKey: localStorage.getItem('lt_groq_apikey') || '',
   meteredApiKey: '',
   localIp: '',
-  translateEngine: 'google',
+  translateEngine: localStorage.getItem('lt_translate_engine') || 'google',
   conversationHistory: [], // für Groq Gesprächskontext
   latencyStart: 0,       // performance.now() when speech was sent
   tSentenceStart: 0,   // first STT result (first word spoken)
@@ -1230,10 +1267,26 @@ function getGuestUrl(code) {
 
 function getLocalGuestUrl(code) {
   if (!state.localIp) return null;
-  const port = window.location.port ? ':' + window.location.port : ':3000';
-  const base = window.location.protocol + '//' + state.localIp + port + window.location.pathname;
-  // Kein API-Key in der lokalen URL — der Gast lädt keys.json direkt vom lokalen Server
-  return base + '?join=' + code;
+  // HTTPS (Port 3443) bevorzugen wenn vorhanden — nötig für Mikrofon auf Gast
+  // Aktuelle Seite auf HTTPS? Dann gleichen Port nutzen
+  const isHttps = window.location.protocol === 'https:';
+  const port = isHttps
+    ? (':' + (window.location.port || '3443'))
+    : ':3000';
+  const protocol = isHttps ? 'https:' : 'http:';
+  const base = protocol + '//' + state.localIp + port + window.location.pathname;
+  const params = new URLSearchParams({ join: code });
+  if (state.meteredApiKey) params.set('meteredkey', state.meteredApiKey);
+  return base + '?' + params.toString();
+}
+
+function getLocalGuestUrlHttps(code) {
+  // Immer HTTPS URL (Port 3443) — für Mikrofon-Zugriff auf Gast
+  if (!state.localIp) return null;
+  const base = 'https://' + state.localIp + ':3443' + window.location.pathname;
+  const params = new URLSearchParams({ join: code });
+  if (state.meteredApiKey) params.set('meteredkey', state.meteredApiKey);
+  return base + '?' + params.toString();
 }
 
 function savePublicBaseUrl() {
@@ -1272,15 +1325,31 @@ function updateQrCode() {
   }
 
   // Lokale Gast-URL (gleiches Netzwerk)
-  const localUrl = getLocalGuestUrl(code);
+  // HTTPS-URL bevorzugen wenn Server auf HTTP läuft (für Mikrofon-Zugriff)
+  const isOnHttps = window.location.protocol === 'https:';
+  const localUrl = isOnHttps ? getLocalGuestUrl(code) : getLocalGuestUrlHttps(code);
+  const localUrlFallback = isOnHttps ? null : getLocalGuestUrl(code);
   const localUrlDiv = document.getElementById('guestUrlLocal');
   const localUrlText = document.getElementById('guestUrlLocalText');
   if (localUrlDiv && localUrlText) {
     if (localUrl) {
       localUrlText.textContent = localUrl;
+      // Label anpassen
+      const label = localUrlDiv.querySelector('span');
+      if (label && !isOnHttps) label.textContent = '🔒 Lokal HTTPS:';
       localUrlDiv.style.display = 'block';
     } else {
       localUrlDiv.style.display = 'none';
+    }
+  }
+  // HTTP-Fallback URL zusätzlich anzeigen wenn auf HTTP
+  const localUrlFbDiv = document.getElementById('guestUrlLocalHttp');
+  if (localUrlFbDiv) {
+    if (!isOnHttps && localUrlFallback) {
+      document.getElementById('guestUrlLocalHttpText').textContent = localUrlFallback;
+      localUrlFbDiv.style.display = 'block';
+    } else {
+      localUrlFbDiv.style.display = 'none';
     }
   }
 
@@ -1335,7 +1404,7 @@ function copyGuestUrl(btn) {
   const joinCode = params.get('join');
   if (joinCode) {
     window.addEventListener('load', () => {
-      // Gast-Tab aktivieren
+      // Gast-Tab vorausfüllen
       document.querySelectorAll('.signal-tab').forEach(b => b.classList.remove('active'));
       document.querySelectorAll('.tab-content').forEach(p => p.classList.remove('active'));
       const guestTab = document.querySelector('[onclick*="guest"]');
@@ -1343,10 +1412,11 @@ function copyGuestUrl(btn) {
       const guestPanel = document.getElementById('guestPanel');
       if (guestPanel) { guestPanel.classList.add('active'); }
       const input = document.getElementById('guestCodeInput');
-      if (input) {
-        input.value = joinCode;
-        joinRoom(); // async — lädt TURN-Server und verbindet
-      }
+      if (input) input.value = joinCode;
+
+      // Tap-to-join Overlay zeigen — Tippen liefert User-Gesture für Audio
+      const overlay = document.getElementById('tapToJoinOverlay');
+      if (overlay) overlay.style.display = 'flex';
     });
   }
 })();
@@ -1516,7 +1586,7 @@ function setupPeerConnection(conn) {
     if (document.getElementById('hostWaiting')) {
       document.getElementById('hostWaiting').textContent = '✓ Gast verbunden';
     }
-    // Audio nochmals entsperren (Verbindungsaufbau kann verzögert sein)
+    // Audio entsperren (nochmals, falls noch nicht aktiv)
     unlockAudio();
   });
 
@@ -1559,8 +1629,8 @@ function setupPeerConnection(conn) {
     // HOST: TTS-Anfrage vom Gast → synthetisieren und zurückschicken
     if (msg.type === 'tts_request') {
       const { id, text, lang } = msg;
-      // Gast gibt seine gewählte Stimme mit — Host nutzt diese statt eigener
       const voiceName = msg.voiceName || state.selectedVoiceName;
+
       if (!voiceName || voiceName === 'browser' || !state.apiKey) {
         // Browser TTS kann nicht übertragen werden — leere Antwort
         conn.send(JSON.stringify({ type: 'tts_response', id, audioContent: null, lang }));
@@ -1587,9 +1657,30 @@ function setupPeerConnection(conn) {
 
     // HOST: Übersetzungsanfrage vom Gast → übersetzen und zurückschicken
     if (msg.type === 'translate_request') {
-      const { id, text, sourceLang, targetLang, isFinal } = msg;
+      const { id, text, sourceLang, targetLang, isFinal, alreadyTranslated, engine, groqKey } = msg;
+      // Engine für diesen Aufruf bestimmen — kein globaler State nötig
+      const useEngine = engine || state.translateEngine;
+      const useGroqKey = groqKey || state.groqApiKey;
+      const isGroqForGuest = useEngine === 'groq' && !!useGroqKey;
       try {
-        const result = await translate(text, sourceLang, targetLang, isFinal, '');
+        // Direkt die richtige Engine aufrufen ohne globalen State zu mutieren
+        let result;
+        const callsBefore = groqCallLog.length;
+        if (isGroqForGuest) {
+          const savedGroqKey = state.groqApiKey;
+          state.groqApiKey = useGroqKey;
+          const effectiveLang = sourceLang === 'auto'
+            ? (state.myLang !== 'auto' ? state.myLang : 'auto') : sourceLang;
+          // Wenn alreadyTranslated vorhanden: Continuation (isFinal=false) damit Groq nur den Rest liefert
+          // Ohne alreadyTranslated: normaler finaler Aufruf
+          const groqIsFinal = isFinal && !alreadyTranslated;
+          result = await groqTranslate(text, effectiveLang, targetLang, groqIsFinal, alreadyTranslated || '');
+          state.groqApiKey = savedGroqKey;
+        } else {
+          result = await googleTranslate(text, sourceLang, targetLang);
+        }
+        const callsSnapshot = groqCallLog.slice(callsBefore);
+        groqCallLog = groqCallLog.slice(0, callsBefore);
         conn.send(JSON.stringify({
           type: 'translate_response',
           id,
@@ -1598,6 +1689,9 @@ function setupPeerConnection(conn) {
           targetLang,
           translation: result,
           isFinal,
+          isGroq: isGroqForGuest,
+          alreadyTranslated: alreadyTranslated || '',
+          groqCalls: callsSnapshot,
         }));
       } catch(e) {
         conn.send(JSON.stringify({
@@ -1608,19 +1702,74 @@ function setupPeerConnection(conn) {
     }
 
     if (msg.type === 'speech') {
-      // Gast schickt Übersetzungsanfrage zurück an Host
-      if (msg.text && msg.text.trim()) {
-        state.latencyStart = performance.now();
-        state.tSendTime = performance.now();
-        conn.send(JSON.stringify({
-          type: 'translate_request',
-          id: msg.id || (Date.now() + '_' + Math.random()),
-          text: msg.text,
-          sourceLang: msg.lang,
-          targetLang: state.targetLang,
-          isFinal: msg.isFinal !== false,
-        }));
+      // HOST empfängt Speech vom Gast → übersetzen und TTS abspielen
+      if (!state.isGuest) {
+        if (msg.text && msg.text.trim()) {
+          state.latencyStart = performance.now();
+          state.tSendTime = performance.now();
+          await handleIncomingText(msg.text, msg.lang || state.targetLang, msg.isFinal !== false);
+        }
+        // Original-Text auf Host anzeigen
+        const origBox = document.getElementById('incomingOriginal');
+        if (origBox && msg.text) {
+          if (msg.isFinal !== false) {
+            const pending = origBox.querySelector('.pending-interim');
+            if (pending) pending.remove();
+            const entry = document.createElement('div');
+            entry.style.cssText = 'border-bottom:1px solid var(--border);padding-bottom:0.4rem;margin-bottom:0.4rem;';
+            entry.textContent = msg.text;
+            origBox.appendChild(entry);
+            origBox.scrollTop = origBox.scrollHeight;
+            origBox.querySelector('.placeholder')?.remove();
+          } else {
+            let pending = origBox.querySelector('.pending-interim');
+            if (!pending) {
+              pending = document.createElement('div');
+              pending.className = 'pending-interim';
+              pending.style.cssText = 'color:var(--text-dim);font-style:italic;';
+              origBox.appendChild(pending);
+              origBox.querySelector('.placeholder')?.remove();
+            }
+            pending.textContent = msg.text;
+          }
+        }
+        return; // Host: nicht weiter verarbeiten
       }
+
+      // GAST empfängt Speech vom Host → Übersetzungsanfrage zurückschicken
+      if (msg.text && msg.text.trim()) {
+        // Latenzstart: Zeitstempel vom Host (wann er gesendet hat)
+        // sentAt ist performance.now() auf dem Host — nicht direkt vergleichbar,
+        // aber wir messen die Zeit ab Empfang auf dem Gast als Annäherung
+        // Latenzberechnung: Host-Verarbeitungszeit + Gast-Verarbeitungszeit
+        // hostNow - speechStart = Zeit von Sprachbeginn bis Senden auf Host
+        // TTS-Start - jetzt = Übersetzungs- + TTS-Vorbereitungszeit auf Gast
+        const guestReceivedAt = performance.now();
+        if (!state.latencyStart || msg.isFinal !== false) {
+          // Gesamtlatenz-Startpunkt: rückgerechnet auf Sprachbeginn
+          // = jetzt - (hostNow - speechStart) - noch nicht gemessene Gast-Zeit
+          const hostProcessingMs = (msg.sentAt && msg.speechStart)
+            ? Math.max(0, msg.sentAt - msg.speechStart) : 0;
+          state.latencyStart = guestReceivedAt - hostProcessingMs;
+          state._hostProcessingMs = hostProcessingMs;
+        }
+        state.tSendTime = guestReceivedAt;
+        // Sofort parallel übersetzen + TTS synthetisieren
+        // Slot in Reihenfolge reservieren — Abspielung sequentiell
+        _guestDispatchFragment({
+          text: msg.text,
+          lang: msg.lang,
+          isFinal: msg.isFinal !== false,
+          alreadyTranslated: _guestInterimAccum.trim(),
+          engine: state.translateEngine,
+          groqKey: state.groqApiKey || '',
+        }, conn);
+      }
+      // Original-Fragment für Log merken
+      if (msg.text && msg.text.trim()) {
+        _guestOrigFragments.push({ text: msg.text, reason: msg.isFinal !== false ? 'debounce' : 'words' });
+      }
+
       // Original-Text in Box anzeigen (ohne zu übersetzen)
       const origBox = document.getElementById('incomingOriginal');
       if (msg.isFinal !== false) {
@@ -1648,6 +1797,29 @@ function setupPeerConnection(conn) {
     if (msg.type === 'translate_response') {
       // Übersetzung vom Host empfangen → TTS abspielen
       await handleTranslateResponse(msg);
+    }
+
+    // Mikrofon-Koordination: nur ein Mikrofon gleichzeitig aktiv
+    if (msg.type === 'mic_start') {
+      // Gast: anderes Mikrofon aktiv → Button deaktivieren
+      if (state.isGuest) {
+        _remoteMicActive = true;
+        if (state.isMicActive) stopMic();
+        _updateMicBtnState();
+      }
+      // Host: Gast-Mikrofon übersteuern falls Host selbst spricht
+      if (!state.isGuest && msg.isHost === false && state.isMicActive) {
+        // Host spricht bereits → Gast stoppen (Gast hat irrtümlich gestartet)
+        state.dataChannel?.send && state.dataChannel.send(JSON.stringify({ type: 'mic_start', isHost: true }));
+      }
+    }
+
+    if (msg.type === 'mic_stop') {
+      // Gast: anderes Mikrofon freigegeben → Button wieder aktivieren
+      if (state.isGuest) {
+        _remoteMicActive = false;
+        _updateMicBtnState();
+      }
     }
 
     if (msg.type === 'tts_response') {
@@ -1706,7 +1878,7 @@ function collectSettings() {
   state.myLang = document.getElementById('myLangLive')?.value || document.getElementById('myLangSelect').value || 'de';
   state.targetLang = document.getElementById('targetLangLive')?.value || document.getElementById('targetLangSelect').value || 'en';
   state.ttsQuality = document.getElementById('ttsQuality').value;
-  state.debounceMs = parseInt(document.getElementById('debounceMs')?.value) || 300;
+  state.debounceMs = parseInt(document.getElementById('debounceMs')?.value) || 1000;
   state.interimMode = document.getElementById('interimMode')?.checked ?? true;
   state.translateEngine = document.getElementById('translateEngine').value;
   state.interimWordCount = parseInt(document.getElementById('interimWordCount')?.value) || 5;
@@ -1786,12 +1958,35 @@ const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecogni
 let nextResultIndex = 0; // Ab welchem Index neue Resultate gelten
 
 function toggleMic() {
+  // Gast: Mikrofon-Button gesperrt wenn anderes Mikrofon aktiv
+  if (state.isGuest && _remoteMicActive && !state.isMicActive) {
+    return; // Stumm ignorieren — Button ist visuell deaktiviert
+  }
+  // Host: beim Aktivieren zuerst Gast-Mikrofon stoppen (Host übersteuert)
+  if (!state.isGuest && !state.isMicActive && state.dataChannel?.readyState === 'open') {
+    state.dataChannel.send(JSON.stringify({ type: 'mic_start', isHost: true }));
+  }
+  if (!window.isSecureContext && !state.isMicActive) {
+    // Nicht sicherer Kontext — externe HTTPS-URL vorschlagen
+    const extUrl = document.getElementById('guestUrlFullText')?.textContent?.trim();
+    const msg = 'Mikrofon-Zugriff benötigt HTTPS.\n\n'
+      + (extUrl && extUrl !== '—'
+        ? 'Bitte die externe URL verwenden:\n' + extUrl
+        : 'Bitte die Seite über HTTPS öffnen (z.B. GitHub Pages URL).');
+    alert(msg);
+    return;
+  }
   state.isMicActive ? stopMic() : startMic();
 }
 
 function startMic() {
   if (!SpeechRecognition) {
     alert('Web Speech API nicht unterstützt. Bitte Chrome verwenden.');
+    return;
+  }
+  // Sicherer Kontext erforderlich für Mikrofon (HTTPS oder localhost)
+  if (!window.isSecureContext) {
+    alert('Mikrofon-Zugriff benötigt HTTPS.\n\nBitte die externe URL (GitHub Pages) verwenden oder einen lokalen HTTPS-Server einrichten.');
     return;
   }
   state.recognition = new SpeechRecognition();
@@ -1806,6 +2001,10 @@ function startMic() {
     btn.classList.replace('idle', 'listening');
     document.getElementById('micBtn').title = 'Aktiv — drücken zum Stoppen';
     document.getElementById('speakingIndicator').classList.add('visible');
+    // Anderen informieren dass dieses Mikrofon aktiv ist
+    if (state.dataChannel?.readyState === 'open') {
+      state.dataChannel.send(JSON.stringify({ type: 'mic_start', isHost: !state.isGuest }));
+    }
   };
 
   let debounceTimer = null;
@@ -1845,227 +2044,80 @@ function startMic() {
       debounceCompleted = false; // neuer Satz beginnt
       // interimDebounceTimer NICHT löschen — läuft durch, prüft newFinalText selbst
       debounceTimer = setTimeout(() => {
-        if (debounceCompleted) return; // Schutz gegen Doppelausführung
+        if (debounceCompleted) return;
         debounceCompleted = true;
         latestInterimText = '';
-        // Satz-Reset: Dolmetscher beginnt neuen Satz von vorne
-        const capturedSpokenTranslation = interimTranslationAccum.trim();
-        const capturedSentWordCount = state.translateEngine === 'groq'
-          ? groqSentWordCount
-          : googleSentWordCount; // vor Reset merken
-        interimSpokenOriginal = '';
-        interimTranslationAccum = '';
-        groqSentWordCount = 0;
         googleSentWordCount = 0;
-        // translationLogBuffer und groqCallLog NICHT leeren — enthalten Interim-Daten für den Log
-        for (let i = nextResultIndex; i < event.results.length; i++) {
-          if (event.results[i].isFinal) nextResultIndex = i + 1;
-        }
-        // Fehlende Wörter nachtragen: capturedSentWordCount = exakte Anzahl bereits reservierter Wörter
-        // Unabhängig von STT-Revisionen — zählt nur Wörter, nicht deren Inhalt
-        {
-          const finalAllWords = newFinalText.trim().split(' ').filter(w => w);
-          if (finalAllWords.length > capturedSentWordCount) {
-            const missingPart = finalAllWords.slice(capturedSentWordCount).join(' ');
-            const lastFrag = state.interimFragments[state.interimFragments.length - 1];
-            if (missingPart.trim() && (!lastFrag || lastFrag.text !== missingPart.trim())) {
-              state.interimFragments.push({ text: missingPart.trim(), reason: 'debounce' });
-              state.sttFragments.push({ text: newFinalText.trim(), reason: 'debounce' });
-            }
+        groqSentWordCount = 0;
+
+        // Latenz: STT-Start → Senden
+        state.latencyStart = speechStart;
+        state.tSendTime = performance.now();
+        speechStart = 0;
+
+        // Fehlende Wörter seit letztem Interim-Fragment nachtragen
+        const finalAllWords = newFinalText.trim().split(' ').filter(w => w);
+        const lastFrag = state.interimFragments[state.interimFragments.length - 1];
+        const lastFragWords = lastFrag ? lastFrag.text.split(' ').filter(w=>w).length : 0;
+        if (finalAllWords.length > lastFragWords) {
+          const missingPart = finalAllWords.slice(lastFragWords).join(' ');
+          if (missingPart.trim()) {
+            state.interimFragments.push({ text: missingPart.trim(), reason: 'debounce' });
+            state.sttFragments.push({ text: newFinalText.trim(), reason: 'debounce' });
           }
         }
 
-        let textToSend = newFinalText.trim();
-        if (capturedSpokenTranslation) {
-          // Bereits gesprochene Wörter vom finalen Text abziehen
-          const finalWords = newFinalText.trim().split(' ').filter(w => w);
-          const spokenWords = interimSpokenOriginal.split(' ').filter(w => w); // leer nach Reset
-          const norm = s => s.toLowerCase().replace(/[.,!?;:]+$/, '');
-          // interimSpokenOriginal wurde bereits resettet — nutze state.fullSentenceOriginal
-          const prevSpoken = state.fullSentenceOriginal ? state.fullSentenceOriginal.split(' ').filter(w=>w) : [];
-          let matchCount = 0;
-          for (let i = 0; i < prevSpoken.length && i < finalWords.length; i++) {
-            if (norm(finalWords[i]) === norm(prevSpoken[i])) matchCount++;
-            else break;
-          }
-          textToSend = finalWords.slice(matchCount).join(' ').trim();
+        for (let i = nextResultIndex; i < event.results.length; i++) {
+          if (event.results[i].isFinal) nextResultIndex = i + 1;
         }
-        state.fullSentenceOriginal = newFinalText.trim();
-        const hadInterim = !!capturedSpokenTranslation;
-        state.latencyStart = speechStart;
-        speechStart = 0;
-        // Wenn debounceRunning-Pfad den vollen Text bereits als isFinal=true gesendet hat,
-        // kein zweites Final-Paket schicken (würde beim Gast doppelt spielen / als leer ankommen)
-        const alreadySentAsFinal = !capturedSpokenTranslation &&
-          (googleSentWordCount >= newFinalText.trim().split(' ').filter(w=>w).length ||
-           groqSentWordCount   >= newFinalText.trim().split(' ').filter(w=>w).length);
-        if (!alreadySentAsFinal) {
-          sendSpeech(textToSend, true, 0, hadInterim ? newFinalText.trim() : null, capturedSpokenTranslation);
+
+        // Vollständigen Text an Gast senden
+        if (state.dataChannel?.readyState === 'open') {
+          const hostFinalNow = performance.now();
+          state.dataChannel.send(JSON.stringify({
+            type: 'speech', text: newFinalText.trim(), lang: state.myLang, isFinal: true,
+            sentAt: hostFinalNow,
+            speechStart: state.latencyStart || hostFinalNow,
+          }));
         }
         document.getElementById('myTranscript').textContent = '';
+
+        // STT-Latenz berechnen und im Log anzeigen
+        const sttMs = state.tSendTime > state.latencyStart && state.latencyStart > 0
+          ? Math.round(state.tSendTime - state.latencyStart) : 0;
+        if (sttMs > 0) recordLatency({ stt: sttMs, trans: 0, tts: 0, total: sttMs });
+        state.latencyStart = 0;
+
+        // Log-Eintrag für Host (Ich spreche)
+        addLogEntry('me', newFinalText.trim(), '', state.myLang, state.targetLang,
+          [...state.interimFragments], null, null, [...state.sttFragments],
+          null, null);
+        state.interimFragments = [];
+        state.sttFragments = [];
       }, state.debounceMs);
     }
 
     // ── Interim-Modus ──
     if (state.interimMode && interimText.trim()) {
       const fullInterim = interimText.trim();
-
-      const isGroqEngine = state.translateEngine === 'groq' && state.groqApiKey;
-
-      if (isGroqEngine) {
-        // ── Groq Interim: Dolmetscher-Kontext, letztes Wort weglassen ──
-        latestInterimText = fullInterim;
-        const currWords = fullInterim.split(' ').filter(w=>w);
-
-        if (currWords.length < groqSentWordCount) {
-          ttsQueue.length = 0;
-          if (state.currentAudio) {
-    try { state.currentAudio.stop(); } catch(e) {}
-    state.currentAudio = null;
-  }
-          ttsPlaying = false;
-          groqSentWordCount = 0;
-          interimSpokenOriginal = '';
-        }
-
-        const newWordCount = currWords.length - groqSentWordCount;
-
-        // Schwelle erreicht ODER: Debounce läuft bereits (newFinalText gesetzt) → sofort senden
-        const debounceRunningGroq = newFinalText.trim().length > 0;
-        if (newWordCount >= state.interimWordCount || (debounceRunningGroq && newWordCount > 0)) {
-          clearTimeout(interimDebounceTimer);
-          const sentCount = groqSentWordCount;
-          const newWords = currWords.slice(sentCount);
-          // Bei Debounce: alle neuen Wörter senden (kein letztes Wort weglassen)
-          const newPart = debounceRunningGroq ? newWords.join(' ') : newWords.slice(0, -1).join(' ');
-          groqSentWordCount = debounceRunningGroq ? currWords.length : currWords.length - 1;
-          interimSpokenOriginal = debounceRunningGroq ? currWords.join(' ') : currWords.slice(0, -1).join(' ');
-
-          interimDebounceTimer = setTimeout(async () => {
-            const lastFrag = state.interimFragments[state.interimFragments.length - 1];
-            const nachtragsAlreadyCovered = lastFrag &&
-              lastFrag.reason === 'debounce' &&
-              lastFrag.text.split(' ').some(w => newPart.split(' ').includes(w));
-            if (!nachtragsAlreadyCovered && (!lastFrag || lastFrag.text !== newPart) && newPart.trim()) {
-              state.interimFragments.push({ text: newPart, reason: 'interval' });
-              state.sttFragments.push({ text: fullInterim, reason: 'interim' });
-            }
-            state.fullSentenceOriginal = fullInterim;
-            state.latencyStart = speechStart;
-            speechStart = 0;
-
-            // Originaltext-Fragment zum Gast senden (Gast übersetzt selbst)
-            // debounceRunning: als isFinal=true senden damit kein doppeltes Final folgt
-            if (state.dataChannel?.readyState === 'open') {
-              state.dataChannel.send(JSON.stringify({ type: 'speech', text: newPart, lang: state.myLang, isFinal: debounceRunningGroq }));
-            }
-
-            const alreadySpoken = interimTranslationAccum.trim();
-            const myGen = handleGeneration;
-
-            let resolvePendingGroq;
-            interimPendingPromise = new Promise(r => { resolvePendingGroq = r; });
-            try {
-              const result = await translate(fullInterim, state.myLang, state.targetLang, false, alreadySpoken);
-              resolvePendingGroq(); interimPendingPromise = null;
-              if (!result || result === '[NOTHING]') return;
-
-              interimTranslationAccum = alreadySpoken ? alreadySpoken + ' ' + result : result;
-              const frag = { text: result, reason: 'single' };
-              interimTranslationFragments.push(frag);
-              translationLogBuffer.push(frag);
-
-              if (myGen === handleGeneration) {
-                const tboxI = document.getElementById('incomingTranslation');
-                let pendingTI = tboxI.querySelector('.pending-translation');
-                if (!pendingTI) {
-                  pendingTI = document.createElement('div');
-                  pendingTI.className = 'pending-translation';
-                  pendingTI.style.cssText = 'color:var(--text-dim);font-style:italic;';
-                  tboxI.appendChild(pendingTI);
-                }
-                pendingTI.textContent = interimTranslationAccum.trim();
-                tboxI.scrollTop = tboxI.scrollHeight;
-                await speakText(result, state.targetLang, false);
-              }
-            } catch(e) { if (resolvePendingGroq) { resolvePendingGroq(); interimPendingPromise = null; } }
-          }, Math.max(150, state.debounceMs / 2));
-        }
-
-      } else {
-        // ── Google Interim: nur neues Fragment übergeben, wordCount-basiert ──
-        const currWords = fullInterim.split(' ').filter(w=>w);
-
-        // STT-Revision: wenn aktuelle Wörter kürzer als bereits reserviert → reset
-        if (currWords.length < googleSentWordCount) {
-          ttsQueue.length = 0;
-          if (state.currentAudio) {
-    try { state.currentAudio.stop(); } catch(e) {}
-    state.currentAudio = null;
-  }
-          ttsPlaying = false;
-          googleSentWordCount = 0;
-        }
-
-        const newWordCount2 = currWords.length - googleSentWordCount;
-
-        // Schwelle erreicht ODER: Debounce läuft bereits (newFinalText gesetzt) → sofort senden
-        const debounceRunning = newFinalText.trim().length > 0;
-        if (newWordCount2 >= state.interimWordCount || (debounceRunning && newWordCount2 > 0)) {
-          clearTimeout(interimDebounceTimer);
-          const sentCount2 = googleSentWordCount;
-          const newWords2 = currWords.slice(sentCount2);
-          // Bei Debounce: alle neuen Wörter senden (kein letztes Wort weglassen)
-          const newPart = debounceRunning ? newWords2.join(' ') : newWords2.slice(0, -1).join(' ');
-          // Reservieren: alle gesendeten Wörter
-          googleSentWordCount = debounceRunning ? currWords.length : currWords.length - 1;
-
-          const myGenInterim = handleGeneration;
-          interimDebounceTimer = setTimeout(async () => {
-            if (handleGeneration !== myGenInterim) return;
-            const lastFrag = state.interimFragments[state.interimFragments.length - 1];
-            if (!lastFrag || lastFrag.text !== newPart) {
-              state.interimFragments.push({ text: newPart, reason: 'words' });
-              state.sttFragments.push({ text: fullInterim, reason: 'interim' });
-            }
-            state.fullSentenceOriginal = fullInterim;
-            state.latencyStart = speechStart;
-            speechStart = 0;
-
-            // Originaltext-Fragment zum Gast senden (Gast übersetzt selbst)
-            // debounceRunning: als isFinal=true senden damit kein doppeltes Final folgt
-            if (state.dataChannel?.readyState === 'open') {
-              state.dataChannel.send(JSON.stringify({ type: 'speech', text: newPart, lang: state.myLang, isFinal: debounceRunning }));
-            }
-
-            const myGen = handleGeneration;
-            let resolvePending;
-            interimPendingPromise = new Promise(r => { resolvePending = r; });
-            try {
-              const result = await translate(newPart, state.myLang, state.targetLang, false, '');
-              resolvePending(); interimPendingPromise = null;
-              if (!result) return;
-
-              interimTranslationAccum = interimTranslationAccum ? interimTranslationAccum + ' ' + result : result;
-              const frag = { text: result, reason: 'single' };
-              interimTranslationFragments.push(frag);
-              translationLogBuffer.push(frag);
-
-              if (myGen === handleGeneration) {
-                const tboxI = document.getElementById('incomingTranslation');
-                let pendingTI = tboxI.querySelector('.pending-translation');
-                if (!pendingTI) {
-                  pendingTI = document.createElement('div');
-                  pendingTI.className = 'pending-translation';
-                  pendingTI.style.cssText = 'color:var(--text-dim);font-style:italic;';
-                  tboxI.appendChild(pendingTI);
-                }
-                pendingTI.textContent = interimTranslationAccum.trim();
-                tboxI.scrollTop = tboxI.scrollHeight;
-                await speakText(result, state.targetLang, false);
-              }
-            } catch(e) { if (resolvePending) { resolvePending(); interimPendingPromise = null; } }
-          }, Math.max(150, state.debounceMs / 2));
+      const currWords = fullInterim.split(' ').filter(w => w);
+      const newWordCount = currWords.length - googleSentWordCount;
+      if (newWordCount >= state.interimWordCount) {
+        const endsWithSpace = interimText.endsWith(' ');
+        const fragment = endsWithSpace ? currWords.join(' ') : currWords.slice(0, -1).join(' ');
+        const newSentCount = endsWithSpace ? currWords.length : currWords.length - 1;
+        if (fragment.trim() && newSentCount > googleSentWordCount) {
+          googleSentWordCount = newSentCount;
+          if (state.dataChannel?.readyState === 'open') {
+            const hostNow = performance.now();
+            state.dataChannel.send(JSON.stringify({
+              type: 'speech', text: fragment, lang: state.myLang, isFinal: false,
+              sentAt: hostNow,
+              speechStart: speechStart || hostNow, // wann Host zu sprechen begann
+            }));
+          }
+          state.interimFragments.push({ text: fragment, reason: 'words' });
+          state.sttFragments.push({ text: fullInterim, reason: 'interim' });
         }
       }
     } else if (!interimText.trim()) {
@@ -2115,6 +2167,24 @@ function startMic() {
     .catch(() => {});
 }
 
+function _updateMicBtnState() {
+  // Nur für Gäste: Mikrofon-Button sperren/entsperren je nach Remote-Mic-Status
+  if (!state.isGuest) return;
+  const btn = document.getElementById('micBtn');
+  if (!btn) return;
+  if (_remoteMicActive) {
+    btn.disabled = true;
+    btn.style.opacity = '0.35';
+    btn.style.cursor = 'not-allowed';
+    btn.title = 'Mikrofon durch anderen Teilnehmer belegt';
+  } else {
+    btn.disabled = false;
+    btn.style.opacity = '';
+    btn.style.cursor = '';
+    btn.title = 'Zum Sprechen drücken';
+  }
+}
+
 function stopMic() {
   state.isMicActive = false;
   nextResultIndex = 0;
@@ -2123,6 +2193,10 @@ function stopMic() {
   btn.classList.replace('listening', 'idle');
   document.getElementById('micBtn').title = 'Zum Sprechen drücken';
   document.getElementById('speakingIndicator').classList.remove('visible');
+  // Anderen informieren dass Mikrofon gestoppt
+  if (state.dataChannel?.readyState === 'open') {
+    state.dataChannel.send(JSON.stringify({ type: 'mic_stop' }));
+  }
 }
 
 // ============================================================
@@ -2147,6 +2221,15 @@ function onTextInput(ta) {
     ? `<span>${text}</span>`
     : '<span class="placeholder">Mikrofon drücken und sprechen...</span>';
 
+  // Clear-Button anzeigen/verstecken
+  const clearBtn = document.getElementById('textInputClearBtn');
+  if (clearBtn) clearBtn.style.display = text.trim() ? 'flex' : 'none';
+
+  // Latenz-Startzeit beim ersten Zeichen setzen
+  if (text.trim() && !state.latencyStart) {
+    state.latencyStart = performance.now();
+  }
+
   if (!text.trim()) {
     _textInputSentWordCount = 0;
     _textInputInterimAccum = '';
@@ -2155,25 +2238,22 @@ function onTextInput(ta) {
     return;
   }
 
-  // ── Interim-Modus: Wort-Schwelle ──
+  // ── Interim-Modus: Wort-Schwelle (wie STT — vollständigen Text senden) ──
   if (state.interimMode) {
-    const newWordCount = words.length - _textInputSentWordCount;
-    if (newWordCount >= state.interimWordCount) {
-      clearTimeout(_textInputInterimDebounce);
-      const newWords = words.slice(_textInputSentWordCount);
-      // Letztes Wort weglassen (wird noch getippt)
-      const fragment = newWords.slice(0, -1).join(' ');
-      _textInputSentWordCount = words.length - 1;
+    const endsWithSpace = ta.value.endsWith(' ');
+    // Vollständigen Text senden, letztes Wort weglassen wenn noch getippt
+    const fragment = endsWithSpace ? words.join(' ') : words.slice(0, -1).join(' ');
+    const fragmentWordCount = endsWithSpace ? words.length : words.length - 1;
 
-      if (fragment.trim()) {
-        _textInputInterimDebounce = setTimeout(() => {
-          if (state.dataChannel?.readyState === 'open') {
-            state.dataChannel.send(JSON.stringify({
-              type: 'speech', text: fragment, lang: state.myLang, isFinal: false
-            }));
-          }
-        }, Math.max(100, state.debounceMs / 3));
+    if (fragment.trim() && fragmentWordCount > _textInputSentWordCount
+        && fragmentWordCount >= _textInputSentWordCount + state.interimWordCount) {
+      _textInputSentWordCount = fragmentWordCount;
+      if (state.dataChannel?.readyState === 'open') {
+        state.dataChannel.send(JSON.stringify({
+          type: 'speech', text: fragment, lang: state.myLang, isFinal: false, sentAt: performance.now()
+        }));
       }
+      addTextInputLogEntry(fragment, 'interim');
     }
   }
 
@@ -2189,12 +2269,16 @@ function sendTextFinal(text) {
   clearTimeout(_textInputDebounce);
   clearTimeout(_textInputInterimDebounce);
 
+  // Textarea leeren
   const ta = document.getElementById('textInput');
   if (ta) { ta.value = ''; ta.style.height = 'auto'; }
+  const clearBtn = document.getElementById('textInputClearBtn');
+  if (clearBtn) clearBtn.style.display = 'none';
 
   document.getElementById('myTranscript').textContent = text;
 
-  state.latencyStart = performance.now();
+  // latencyStart wurde beim ersten Tippen gesetzt — nicht überschreiben
+  if (!state.latencyStart) state.latencyStart = performance.now();
   state.tSendTime = performance.now();
 
   // Vollständigen Text als final senden
@@ -2206,11 +2290,141 @@ function sendTextFinal(text) {
 
   _textInputSentWordCount = 0;
   _textInputInterimAccum = '';
+  addTextInputLogEntry(text, 'final');
 }
 
 function sendTextInput() {
   const ta = document.getElementById('textInput');
   if (ta && ta.value.trim()) sendTextFinal(ta.value.trim());
+}
+
+// ── Typewriter ──────────────────────────────────────────────
+let _typewriterTimer = null;
+let _typewriterPos = 0;
+let _typewriterRunning = false;
+
+function toggleTypewriter() {
+  if (_typewriterRunning) {
+    stopTypewriter();
+  } else {
+    startTypewriter();
+  }
+}
+
+function startTypewriter() {
+  const src = document.getElementById('typewriterSource');
+  const ta  = document.getElementById('textInput');
+  if (!src || !ta) return;
+  const text = src.value;
+  if (!text.trim()) return;
+
+  _typewriterRunning = true;
+  _typewriterPos = 0;
+  ta.value = '';
+  ta.style.height = 'auto';
+  onTextInput(ta); // Clear-Button etc. aktualisieren
+
+  const btn = document.getElementById('typewriterPlayBtn');
+  if (btn) { btn.textContent = '⏹'; btn.title = 'Stoppen'; }
+
+  function typeNext() {
+    if (!_typewriterRunning || _typewriterPos >= text.length) {
+      stopTypewriter();
+      // Finales Senden auslösen wenn Text vollständig
+      if (_typewriterPos >= text.length && ta.value.trim()) {
+        sendTextFinal(ta.value.trim());
+      }
+      return;
+    }
+    const ch = text[_typewriterPos];
+    ta.value += ch;
+    _typewriterPos++;
+    ta.style.height = 'auto';
+    ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
+    onTextInput(ta);
+
+    const charsPerSec = parseInt(document.getElementById('typewriterSpeed')?.value) || 5;
+    const delay = Math.round(1000 / charsPerSec);
+    _typewriterTimer = setTimeout(typeNext, delay);
+  }
+  typeNext();
+}
+
+function stopTypewriter() {
+  _typewriterRunning = false;
+  clearTimeout(_typewriterTimer);
+  _typewriterTimer = null;
+  const btn = document.getElementById('typewriterPlayBtn');
+  if (btn) { btn.textContent = '▶'; btn.title = 'Abspielen'; }
+}
+
+function clearTextInput() {
+  const ta = document.getElementById('textInput');
+  if (ta) { ta.value = ''; ta.style.height = 'auto'; ta.focus(); }
+  _textInputSentWordCount = 0;
+  _textInputInterimAccum = '';
+  const btn = document.getElementById('textInputClearBtn');
+  if (btn) btn.style.display = 'none';
+  stopTypewriter();
+  _textInputLogFragments = [];
+  state.latencyStart = 0;
+  _textInputSentWordCount = 0;
+  // Pending-Eintrag im Gesprächslog entfernen
+  document.getElementById('logEntries')?.querySelector('.text-input-pending')?.remove();
+}
+
+// Accumulator für Texteingabe-Fragmente — wird zum Log-Eintrag zusammengefasst
+let _textInputLogFragments = [];
+
+function addTextInputLogEntry(text, type) {
+  const makeSep = char =>
+    `<span style="color:var(--accent3);font-weight:600;margin:0 4px;opacity:0.8;">${char}</span>`;
+
+  if (type === 'interim') {
+    // Fragment merken, noch nicht flushen
+    _textInputLogFragments.push(text);
+
+    // Aktuellen Stand im Log als letzten Eintrag aktualisieren (oder neu erstellen)
+    const logEntries = document.getElementById('logEntries');
+    if (!logEntries) return;
+    let pending = logEntries.querySelector('.text-input-pending');
+    if (!pending) {
+      pending = document.createElement('div');
+      pending.className = 'log-entry text-input-pending';
+      pending.style.cssText = 'opacity:0.7;';
+      logEntries.appendChild(pending);
+    }
+    // Fragmente mit | Separatoren anzeigen
+    const parts = _textInputLogFragments.map((f, i) =>
+      `<span>${f.replace(/</g,'&lt;')}</span>` + makeSep(i < _textInputLogFragments.length - 1 ? '|' : '{')
+    ).join('');
+    pending.innerHTML = `
+      <div class="log-entry-avatar">😊</div>
+      <div class="log-entry-content">
+        <div class="log-entry-original" style="font-family:'DM Mono',monospace;">${langNames[state.myLang] || state.myLang}: ${parts}</div>
+      </div>`;
+    pending.scrollIntoView({ behavior: 'smooth', block: 'end' });
+
+  } else {
+    // Final: pending-Eintrag durch vollständigen ersetzen
+    const logEntries = document.getElementById('logEntries');
+    const pending = logEntries?.querySelector('.text-input-pending');
+    if (pending) pending.remove();
+
+    // Fragmente + finaler Text als vollständiger Eintrag
+    const frags = _textInputLogFragments.map(f => ({ text: f, reason: 'words' }));
+    // Prüfen ob finaler Text bereits im letzten Fragment enthalten ist
+    const lastFrag = frags[frags.length - 1];
+    if (!lastFrag || lastFrag.text.trim() !== text.trim()) {
+      frags.push({ text, reason: 'debounce' });
+    } else {
+      frags[frags.length - 1].reason = 'debounce';
+    }
+    _textInputLogFragments = [];
+
+    // Als normalen Log-Eintrag hinzufügen
+    addLogEntry('me', text, '', state.myLang, state.targetLang, frags, null, null, null, null, null);
+  }
 }
 
 // ============================================================
@@ -2224,99 +2438,241 @@ let _guestInterimAccum = '';      // bereits gesprochene Übersetzungs-Akkumulat
 const _guestTtsPending = new Map(); // id → resolve-Funktion für tts_response
 let _guestHandleGen  = 0;         // Generation-Counter (für Interim-Verwerfen)
 let _guestPendingLog = null;      // ausstehender Log-Eintrag
+let _guestLastRequestId = null;   // ID der letzten Anfrage (stale-check)
+let _remoteMicActive = false;      // Anderes Mikrofon aktiv → Gast-Button gesperrt
+// Parallele Pipeline: Übersetzung+TTS sofort, Abspielung sequentiell per Slot
+let _guestSlotQueue = [];         // Slots in Empfangsreihenfolge: {audioPromise, isFinal, meta}
+let _guestSlotPlaying = false;    // Läuft gerade die sequentielle Abspielung?
+let _guestOrigFragments = [];     // empfangene Original-Fragmente für Log
+let _guestTransFragments = [];    // übersetzte Fragmente für Log
+let _guestGroqCalls = [];         // akkumulierte Groq-Aufrufe vom Host für Log
+let _guestFinalTranslation = '';  // finale vollständige Übersetzung (für Qualitätsbewertung)
 
+// Parallele Fragment-Pipeline:
+// 1. Sofort translate_request senden
+// 2. Slot in _guestSlotQueue reservieren
+// 3. Wenn Antwort kommt → Slot mit Audio-Promise resolven
+// 4. Sequentielle Abspielung arbeitet Queue von vorne ab
+
+function _guestDispatchFragment(req, conn) {
+  if (!conn) return;
+
+  // Slot reservieren (in Empfangsreihenfolge)
+  let resolveSlot, rejectSlot;
+  const slotPromise = new Promise((res, rej) => { resolveSlot = res; rejectSlot = rej; });
+  const slot = {
+    promise: slotPromise,
+    resolve: resolveSlot,
+    isFinal: req.isFinal,
+    req,
+  };
+  _guestSlotQueue.push(slot);
+
+  // Sofort Übersetzungsanfrage senden
+  const reqId = Date.now() + '_' + Math.random();
+  _guestLastRequestId = reqId;
+  slot.reqId = reqId;
+  state._t0guestTrans = performance.now();
+
+  conn.send(JSON.stringify({
+    type: 'translate_request',
+    id: reqId,
+    text: req.text,
+    sourceLang: req.lang,
+    targetLang: state.targetLang,
+    isFinal: req.isFinal,
+    alreadyTranslated: req.alreadyTranslated,
+    engine: req.engine,
+    groqKey: req.groqKey,
+  }));
+
+  // Sequentielle Abspielung starten falls nicht läuft
+  if (!_guestSlotPlaying) _guestPlaySlots();
+}
+
+async function _guestPlaySlots() {
+  if (_guestSlotPlaying) return;
+  _guestSlotPlaying = true;
+  while (_guestSlotQueue.length > 0) {
+    const slot = _guestSlotQueue[0];
+    // Warten bis dieser Slot aufgelöst ist (Übersetzung + TTS-Audio bereit)
+    const audio = await slot.promise.catch(() => null);
+    _guestSlotQueue.shift();
+    if (audio) {
+      await _guestPlayAudio(audio, slot.isFinal, slot.meta);
+    }
+  }
+  _guestSlotPlaying = false;
+}
+
+// handleTranslateResponse: findet den passenden Slot und resolvet ihn mit Audio-Daten
 async function handleTranslateResponse(msg) {
   const { text, sourceLang, targetLang, translation, isFinal } = msg;
   const translationText = (translation || '').trim();
+  const tbox = document.getElementById('incomingTranslation');
 
-  const origBox = document.getElementById('incomingOriginal');
-  const tbox    = document.getElementById('incomingTranslation');
+  // Übersetzungszeit messen
+  if (state._t0guestTrans > 0) {
+    state._transMs = Math.round(performance.now() - state._t0guestTrans);
+    state._t0guestTrans = 0;
+  }
 
-  if (isFinal) {
-    _guestHandleGen++;
+  // Groq-Aufrufe + finale Übersetzung akkumulieren
+  if (msg.groqCalls?.length > 0) _guestGroqCalls.push(...msg.groqCalls);
+  if (isFinal && translationText) _guestFinalTranslation = translationText;
 
-    // Übersetzung in Box
-    const pendingT = tbox.querySelector('.pending-translation');
-    if (pendingT) pendingT.remove();
-    const tentry = document.createElement('div');
-    tentry.style.cssText = 'border-bottom:1px solid rgba(124,111,255,0.15);padding-bottom:0.4rem;margin-bottom:0.4rem;';
-    tentry.textContent = _guestInterimAccum
-      ? (_guestInterimAccum + (translationText ? ' ' + translationText : ''))
-      : translationText;
-    tbox.appendChild(tentry);
-    tbox.scrollTop = tbox.scrollHeight;
-
-    // Rest bestimmen (Wort-Differenz)
-    let restTranslation = '';
-    if (_guestInterimAccum && translationText) {
-      const spoken = _guestInterimAccum.trim().split(/\s+/).filter(w => w);
-      const all    = translationText.split(/\s+/).filter(w => w);
-      restTranslation = all.slice(spoken.length).join(' ');
-    } else {
-      restTranslation = translationText;
-    }
-
-    const totalSpoken = _guestInterimAccum
-      ? (_guestInterimAccum + (restTranslation ? ' ' + restTranslation : ''))
-      : restTranslation;
-
-    if (totalSpoken) {
-      _guestPendingLog = {
-        who: 'other',
-        original: text,
-        translated: totalSpoken,
-        fromLang: sourceLang,
-        toLang: targetLang,
-        ttsCalls: [],
-        _waitingForTTS: true,
-      };
-    }
-
-    _guestInterimAccum = '';
-
-    if (restTranslation) {
-      ttsCallLog.push({ text: restTranslation, lang: targetLang, isFinal: true });
-    }
-    if (_guestPendingLog) {
-      _guestPendingLog.ttsCalls = [...ttsCallLog];
-      _guestPendingLog._waitingForTTS = false;
-      ttsCallLog = [];
-      if (_guestPendingLog.translated) {
-        addLogEntry(_guestPendingLog.who, _guestPendingLog.original,
-          _guestPendingLog.translated, _guestPendingLog.fromLang,
-          _guestPendingLog.toLang, null, null, null, null, null,
-          _guestPendingLog.ttsCalls);
+  // Übersetzten Text berechnen (newPart = was noch nicht gesprochen wurde)
+  let newPart = '';
+  if (translationText) {
+    if (!isFinal) {
+      // Interim: Continuation
+      const { isGroq, alreadyTranslated: alreadySent } = msg;
+      if (isGroq && alreadySent) {
+        newPart = translationText;
+      } else if (alreadySent && translationText) {
+        const spoken = alreadySent.trim().split(/\s+/).filter(w => w);
+        const all = translationText.split(/\s+/).filter(w => w);
+        newPart = all.slice(spoken.length).join(' ');
+      } else {
+        newPart = translationText;
       }
-      _guestPendingLog = null;
+    } else {
+      // Final: Rest nach Interims
+      if (_guestInterimAccum && translationText) {
+        newPart = msg.isGroq ? translationText
+          : translationText.split(/\s+/).filter(w=>w).slice(
+              _guestInterimAccum.trim().split(/\s+/).filter(w=>w).length
+            ).join(' ');
+      } else {
+        newPart = translationText;
+      }
     }
+  }
 
-    if (restTranslation) {
-      await speakText(restTranslation, targetLang, true);
-    }
-
-  } else {
-    // Interim-Fragment
-    const myGen = _guestHandleGen;
-    if (!translationText) return;
-
-    _guestInterimAccum = _guestInterimAccum
-      ? _guestInterimAccum + ' ' + translationText
-      : translationText;
-
+  // Akkumulation + UI aktualisieren
+  if (newPart.trim() && !isFinal) {
+    _guestInterimAccum = _guestInterimAccum ? _guestInterimAccum + ' ' + newPart : newPart;
+    _guestTransFragments.push({ text: newPart, reason: 'words' });
     let pendingTI = tbox.querySelector('.pending-translation');
     if (!pendingTI) {
       pendingTI = document.createElement('div');
       pendingTI.className = 'pending-translation';
       pendingTI.style.cssText = 'color:var(--text-dim);font-style:italic;';
       tbox.appendChild(pendingTI);
-      tbox.querySelector('[style*="font-style:italic"]:not(.pending-translation)')?.remove();
     }
     pendingTI.textContent = _guestInterimAccum.trim();
     tbox.scrollTop = tbox.scrollHeight;
+  }
 
-    if (myGen === _guestHandleGen) {
-      ttsCallLog.push({ text: translationText, lang: targetLang, isFinal: false });
-      await speakText(translationText, targetLang, false);
+  // Passenden Slot finden (nach reqId)
+  const slot = _guestSlotQueue.find(s => s.reqId === msg.id);
+  if (!slot) return; // veraltete Antwort
+
+  // TTS sofort synthetisieren (parallel zur Abspielung anderer Slots)
+  let audioContent = null;
+  if (newPart.trim()) {
+    // tts_request an Host schicken und auf Audio warten
+    audioContent = await new Promise(resolve => {
+      const ttsId = Date.now() + '_' + Math.random();
+      _guestTtsPending.set(ttsId, resolve);
+      if (peerConn) {
+        peerConn.send(JSON.stringify({
+          type: 'tts_request', id: ttsId,
+          text: newPart, lang: targetLang,
+          voiceName: state.selectedVoiceName,
+        }));
+      }
+      setTimeout(() => {
+        if (_guestTtsPending.has(ttsId)) {
+          _guestTtsPending.delete(ttsId);
+          resolve(null);
+        }
+      }, 8000);
+    });
+  }
+
+  // Slot mit Audio-Daten + Metadaten resolven
+  slot.meta = {
+    newPart, isFinal, text, sourceLang, targetLang,
+    interimAccumSnap: _guestInterimAccum,
+    groqCallsSnap: isFinal ? [..._guestGroqCalls] : null,
+    origFragsSnap: isFinal ? [..._guestOrigFragments] : null,
+    transFragsSnap: isFinal ? [..._guestTransFragments] : null,
+    finalTranslation: isFinal ? _guestFinalTranslation : null,
+  };
+  slot.resolve(audioContent);
+
+  // Bei finalem Fragment: Akkumulatoren zurücksetzen
+  if (isFinal) {
+    _guestHandleGen++;
+    _guestInterimAccum = '';
+    _remoteMicActive = false;
+    _updateMicBtnState();
+    // Finales UI
+    const pendingT = tbox.querySelector('.pending-translation');
+    if (pendingT) pendingT.remove();
+  }
+}
+
+// Spielt Audio eines Slots ab und schreibt Log-Eintrag
+async function _guestPlayAudio(audioContent, isFinal, meta) {
+  if (!meta) return;
+  const { newPart, targetLang, text, sourceLang,
+          groqCallsSnap, origFragsSnap, transFragsSnap, finalTranslation } = meta;
+
+  ttsCallLog.push({ text: newPart, lang: targetLang, isFinal });
+
+  if (audioContent) {
+    // Web Audio API abspielen
+    if (!window._sharedAudioCtx) {
+      window._sharedAudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    }
+    const ctx = window._sharedAudioCtx;
+    try {
+      if (ctx.state !== 'running') await ctx.resume();
+      if (ctx.state === 'running') {
+        await new Promise(async resolve => {
+          try {
+            const bytes = Uint8Array.from(atob(audioContent), c => c.charCodeAt(0));
+            const audioBuffer = await ctx.decodeAudioData(bytes.buffer);
+            const source = ctx.createBufferSource();
+            source.buffer = audioBuffer;
+            source.connect(ctx.destination);
+            const now = performance.now();
+            const ttsMs = 0; // bereits synthetisiert — Abrufzeit nicht messbar
+            const sttMs = state.tSendTime > state.latencyStart
+              ? Math.round(state.tSendTime - state.latencyStart) : 0;
+            const transMs = state._transMs || 0;
+            const totalMs = state.latencyStart > 0 ? Math.round(now - state.latencyStart) : 0;
+            if (isFinal) { state.latencyStart = 0; state._transMs = 0; }
+            if (totalMs > 0) recordLatency({ stt: sttMs, trans: transMs, tts: ttsMs, total: totalMs });
+            source.onended = () => resolve();
+            source.start(0);
+            state.currentAudio = source;
+          } catch(e) { resolve(); await playBrowserOnce(newPart, targetLang); }
+        });
+      }
+    } catch(e) {}
+  } else if (newPart.trim()) {
+    await playBrowserOnce(newPart, targetLang);
+  }
+
+  // Log-Eintrag nach finalem Fragment
+  if (isFinal && groqCallsSnap) {
+    const totalSpoken = meta.interimAccumSnap
+      ? (meta.interimAccumSnap + (newPart ? ' ' + newPart : ''))
+      : newPart;
+    if (totalSpoken || meta.interimAccumSnap) {
+      if (newPart) transFragsSnap.push({ text: newPart, reason: 'debounce' });
+      addLogEntry('other', text, totalSpoken || meta.interimAccumSnap,
+        sourceLang, targetLang,
+        origFragsSnap, finalTranslation || null, transFragsSnap,
+        null, groqCallsSnap, [...ttsCallLog]);
+      ttsCallLog = [];
+      _guestOrigFragments = [];
+      _guestTransFragments = [];
+      _guestGroqCalls = [];
+      _guestFinalTranslation = '';
     }
   }
 }
@@ -2354,6 +2710,10 @@ let ttsCallLog = [];                  // TTS-Aufrufe für Debug-Log
 let handleGeneration = 0;
 
 async function handleIncomingText(text, sourceLang, isFinal = true, spokenOriginalWords = 0, fullText = null, capturedSpokenTranslation = '') {
+  // Gast empfängt keine eingehenden Texte via handleIncomingText
+  // (Gast-eigene STT läuft via Debounce → dataChannel → Host → handleIncomingText auf Host)
+  // (Eingehende Host-Texte laufen via handleTranslateResponse)
+  if (state.isGuest) return;
   // Lock: verhindert parallele Interim-Verarbeitung
   if (!isFinal && interimProcessing) return;
   if (!isFinal) interimProcessing = true;
@@ -2834,15 +3194,28 @@ function updateVoice() {
 // ============================================================
 // AUDIO UNLOCK — AutoPlay-Policy umgehen
 // ============================================================
+function tapToJoin() {
+  // User-Gesture: AudioContext entsperren und Verbindung aufbauen
+  unlockAudio();
+  const overlay = document.getElementById('tapToJoinOverlay');
+  if (overlay) overlay.style.display = 'none';
+  joinRoom();
+}
+
 function showAudioUnlockOverlay() {
   const overlay = document.getElementById('audioUnlockOverlay');
   if (overlay) overlay.style.display = 'flex';
+  // TTS-Queue pausieren bis User tippt
+  window._audioLocked = true;
 }
 
 function activateAudio() {
   const overlay = document.getElementById('audioUnlockOverlay');
   if (overlay) overlay.style.display = 'none';
+  window._audioLocked = false;
   unlockAudio();
+  // TTS-Queue neu starten falls Elemente warten
+  setTimeout(() => processQueue(), 200);
 }
 
 // Persistenter AudioContext für alle TTS-Wiedergaben
@@ -2889,6 +3262,7 @@ function enqueueTTS(text, lang, isFinal) {
 }
 
 async function processQueue() {
+  if (window._audioLocked) return; // Warten bis User Audio entsperrt
   if (ttsPlaying || ttsQueue.length === 0) return;
   ttsPlaying = true;
   const { text, lang } = ttsQueue.shift();
@@ -2908,6 +3282,7 @@ async function playOnce(text, lang) {
 
   // GAST: TTS-Anfrage an Host schicken (Host hat API-Key und Stimme)
   if (state.isGuest && peerConn) {
+
     ttsInd.classList.add('visible');
     const _t0tts = performance.now();
     const id = Date.now() + '_' + Math.random();
@@ -3526,6 +3901,13 @@ function hangUp() {
   _guestHandleGen = 0;
   _guestPendingLog = null;
   _guestTtsPending.clear();
+  _guestOrigFragments = [];
+  _guestTransFragments = [];
+  _guestGroqCalls = [];
+  _guestFinalTranslation = '';
+  _guestLastRequestId = null;
+  _guestSlotQueue = [];
+  _guestSlotPlaying = false;
   interimTranslationFragments = [];
   translationLogBuffer = [];
   groqCallLog = [];
