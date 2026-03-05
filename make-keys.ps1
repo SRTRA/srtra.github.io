@@ -1,9 +1,10 @@
-﻿# Liest API Keys aus config.txt und erstellt keys.json
+# Liest API Keys aus config.txt und erstellt keys.json
 
 $lines = Get-Content "config.txt"
 $google = $lines[0].Trim()
 $groq = ""
 $publicBaseUrl = ""
+$meteredApiKey = ""
 
 foreach ($line in $lines) {
     if ($line -match "^OPENAI_KEY=(.+)$") {
@@ -11,6 +12,9 @@ foreach ($line in $lines) {
     }
     if ($line -match "^PUBLIC_URL=(.+)$") {
         $publicBaseUrl = $matches[1].Trim()
+    }
+    if ($line -match "^METERED_KEY=(.+)$") {
+        $meteredApiKey = $matches[1].Trim()
     }
 }
 
@@ -53,12 +57,19 @@ if ($publicBaseUrl.Length -gt 0) {
     Write-Host "  Externe Gast-URL: $publicBaseUrl (Raum-Code wird nach Erstellen angezeigt)"
 }
 
+if ($meteredApiKey.Length -gt 0) {
+    Write-Host "  Metered Key: $($meteredApiKey.Substring(0, [Math]::Min(8,$meteredApiKey.Length)))..."
+} else {
+    Write-Host "  Metered Key: (nicht gesetzt - Fallback TURN-Server)"
+}
+
 # keys.json schreiben
 $json = @{
     googleKey     = $google
     groqKey       = $groq
     localIp       = $ip
     publicBaseUrl = $publicBaseUrl
+    meteredApiKey = $meteredApiKey
 } | ConvertTo-Json
 
 Set-Content "keys.json" $json
