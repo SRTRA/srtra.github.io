@@ -820,6 +820,16 @@
                     <input id="roomCodeDisplay" readonly onclick="this.select()" style="font-size:1.4rem;font-family:'DM Mono',monospace;font-weight:700;letter-spacing:0.15em;color:var(--accent);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:0.4rem 0.8rem;width:140px;text-align:center;" />
                   </div>
                   <p id="hostWaiting" style="font-size:0.75rem;color:var(--text-dimmer);font-family:'DM Mono',monospace;margin-top:0.25rem;">⏳ Warte auf Gast...</p>
+                  <!-- Raum-Modus -->
+                  <div style="margin-top:0.6rem;display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;">
+                    <span style="font-size:0.7rem;font-family:'DM Mono',monospace;color:var(--text-dim);">Modus:</span>
+                    <select id="roomModeSelect" onchange="setRoomMode(this.value)"
+                      style="font-size:0.72rem;font-family:'DM Mono',monospace;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:0.2rem 0.4rem;cursor:pointer;">
+                      <option value="broadcast">📢 Broadcast — nur Host spricht</option>
+                      <option value="hub">🎙 Hub — alle sprechen, Gäste hören Host</option>
+                      <option value="conference">🔁 Konferenz — alle hören alle</option>
+                    </select>
+                  </div>
                   <div id="guestUrlFull" style="margin-top:0.6rem;font-size:0.65rem;font-family:'DM Mono',monospace;color:var(--text-dimmer);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:0.35rem 0.6rem;word-break:break-all;display:none;">
                     <div style="display:flex;align-items:center;justify-content:space-between;gap:0.5rem;">
                       <span style="color:var(--text-dim);white-space:nowrap;">🌐 Extern:</span>
@@ -935,7 +945,44 @@
           <option value="browser" title="Browser TTS — kostenlos&#10;Keine API nötig&#10;Qualität abhängig vom Betriebssystem">🌐 Browser TTS</option>
         </select>
         <button class="btn btn-danger" onclick="hangUp()" style="padding:0.4rem 0.8rem;font-size:0.78rem;">✕ Beenden</button>
+        <!-- Raum-Modus: nur auf Host sichtbar -->
+        <select id="roomModeSelectLive" onchange="setRoomMode(this.value)"
+          style="display:none;padding:0.35rem 0.5rem;font-size:0.75rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);"
+          title="Raum-Modus">
+          <option value="broadcast">📢 Broadcast</option>
+          <option value="hub">🎙 Hub</option>
+          <option value="conference">🔁 Konferenz</option>
+        </select>
       </div>
+    </div>
+
+    <!-- QR/Link-Leiste: nur für Host sichtbar -->
+    <div id="liveQrBar" style="display:none;background:var(--surface);border-bottom:1px solid var(--border);padding:0.5rem 1rem;align-items:center;gap:1rem;flex-wrap:wrap;">
+      <!-- Lokal -->
+      <div style="display:flex;align-items:center;gap:0.4rem;">
+        <div id="liveQrLocal" style="background:white;padding:5px;border-radius:8px;flex-shrink:0;"></div>
+        <div style="display:flex;flex-direction:column;gap:0.2rem;">
+          <span style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--accent);">🏠 Lokal</span>
+          <span id="liveUrlLocal" style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text-dimmer);word-break:break-all;max-width:200px;">—</span>
+          <div style="display:flex;gap:0.3rem;">
+            <button onclick="window.open(document.getElementById('liveUrlLocal').textContent,'_blank')" style="background:transparent;border:none;cursor:pointer;color:var(--accent);font-size:0.8rem;padding:0;" title="Öffnen">↗</button>
+            <button onclick="copyUrl(this,'liveUrlLocal')" style="background:transparent;border:none;cursor:pointer;color:var(--text-dim);font-size:0.75rem;padding:0;" title="Kopieren">📋</button>
+          </div>
+        </div>
+      </div>
+      <!-- Extern -->
+      <div style="display:flex;align-items:center;gap:0.4rem;">
+        <div id="liveQrExtern" style="background:white;padding:5px;border-radius:8px;flex-shrink:0;"></div>
+        <div style="display:flex;flex-direction:column;gap:0.2rem;">
+          <span style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--accent3);">🌐 Extern</span>
+          <span id="liveUrlExtern" style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text-dimmer);word-break:break-all;max-width:200px;">—</span>
+          <div style="display:flex;gap:0.3rem;">
+            <button onclick="window.open(document.getElementById('liveUrlExtern').textContent,'_blank')" style="background:transparent;border:none;cursor:pointer;color:var(--accent3);font-size:0.8rem;padding:0;" title="Öffnen">↗</button>
+            <button onclick="copyUrl(this,'liveUrlExtern')" style="background:transparent;border:none;cursor:pointer;color:var(--text-dim);font-size:0.75rem;padding:0;" title="Kopieren">📋</button>
+          </div>
+        </div>
+      </div>
+      <span id="liveGuestCount" style="font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--text-dimmer);margin-left:auto;"></span>
     </div>
 
     <div class="lang-grid">
@@ -1183,6 +1230,7 @@ let state = {
   interimWordCount: 5,
   mode: 'host',
   isMicActive: false,
+  roomMode: 'broadcast',  // 'broadcast' | 'hub' | 'conference'
   recognition: null,
   pc: null,
   dataChannel: null,
@@ -1429,7 +1477,14 @@ function setMode(mode, btn) {
 // PEERJS SIGNALING
 // ============================================================
 let peer = null;
-let peerConn = null;
+let peerConn = null;            // Gast: Verbindung zum Host
+const guestConns = new Map();   // Host: alle Gast-Verbindungen {peerId → conn}
+
+// Raum-Modus
+// 'broadcast'   — nur Host spricht, Gäste hören
+// 'hub'         — alle sprechen, Gäste hören nur Host
+// 'conference'  — alle sprechen, alle hören alle
+
 
 // TURN-Server — werden dynamisch geladen (fetchIceServers)
 // Fallback-Konfiguration falls kein dynamischer Abruf
@@ -1483,6 +1538,78 @@ async function fetchIceServers() {
   return _iceServersFetching;
 }
 
+// Nachricht an alle verbundenen Gäste senden
+// ── Raum-Modus ──────────────────────────────────────────────
+function setRoomMode(mode) {
+  state.roomMode = mode;
+  // Beide Selectors synchronisieren
+  const s1 = document.getElementById('roomModeSelect');
+  const s2 = document.getElementById('roomModeSelectLive');
+  if (s1) s1.value = mode;
+  if (s2) s2.value = mode;
+  // Alle verbundenen Gäste über neuen Modus informieren (zuerst, damit Button-Status stimmt)
+  broadcastToGuests(JSON.stringify({ type: 'room_mode', mode }));
+  // Bei Broadcast: alle Gäste auffordern ihr Mikrofon zu stoppen
+  if (mode === 'broadcast') {
+    broadcastToGuests(JSON.stringify({ type: 'mic_start', isHost: true }));
+  }
+  _updateMicBtnState();
+  console.log('[Room] Modus gesetzt:', mode, '— Gäste:', guestConns.size);
+}
+
+function _updateLiveQrBar() {
+  const code = state.roomId;
+  if (!code) return;
+  const localUrl = getLocalGuestUrl(code);
+  const externUrl = getGuestUrl(code);
+  // URLs setzen
+  const elLocal = document.getElementById('liveUrlLocal');
+  const elExtern = document.getElementById('liveUrlExtern');
+  if (elLocal && localUrl) elLocal.textContent = localUrl;
+  if (elExtern) elExtern.textContent = externUrl;
+  // QR-Codes generieren
+  const qrLocal = document.getElementById('liveQrLocal');
+  const qrExtern = document.getElementById('liveQrExtern');
+  if (qrLocal && localUrl) {
+    qrLocal.innerHTML = '';
+    new QRCode(qrLocal, { text: localUrl, width: 80, height: 80,
+      colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+  }
+  if (qrExtern) {
+    qrExtern.innerHTML = '';
+    new QRCode(qrExtern, { text: externUrl, width: 80, height: 80,
+      colorDark: '#000000', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+  }
+}
+
+function _updateGuestCountDisplay() {
+  const el = document.getElementById('hostWaiting');
+  const n = guestConns.size;
+  const txt = n === 0 ? '⏳ Warte auf Gast...' : `✓ ${n} Gast${n > 1 ? 'e' : ''} verbunden`;
+  if (el) el.textContent = txt;
+  const el2 = document.getElementById('liveGuestCount');
+  if (el2) el2.textContent = n > 0 ? `${n} Gast${n > 1 ? 'e' : ''} verbunden` : '';
+}
+
+function broadcastToGuests(data) {
+  const json = typeof data === 'string' ? data : JSON.stringify(data);
+  guestConns.forEach((conn, id) => {
+    if (conn.open) {
+      conn.send(json);
+    } else {
+      guestConns.delete(id);
+    }
+  });
+}
+
+// Nachricht an alle ausser einem Gast senden (für Konferenz-Weiterleitung)
+function broadcastToGuestsExcept(data, excludeId) {
+  const json = typeof data === 'string' ? data : JSON.stringify(data);
+  guestConns.forEach((conn, id) => {
+    if (id !== excludeId && conn.open) conn.send(json);
+  });
+}
+
 function createPeer(id) {
   return new Peer(id, {
     config: iceConfig,
@@ -1504,15 +1631,31 @@ function createRoom() {
     state.roomId = id;
     document.getElementById('roomCodeDisplay').value = id;
     document.getElementById('hostOffer').classList.remove('hidden');
-
-    // QR-Code generieren (nutzt getGuestUrl → inkl. API-Keys + publicBaseUrl)
     updateQrCode();
+    _updateLiveQrBar();
   });
 
   peer.on('connection', conn => {
     console.log('[PeerJS Host] Guest connected:', conn.peer);
-    peerConn = conn;
+    peerConn = conn; // letzter Gast (für Gast-seitigen peerConn-Zugriff)
+    guestConns.set(conn.peer, conn);
+
+    // Broadcast-Channel: sendet an alle Gäste
+    state.dataChannel = {
+      readyState: 'open',
+      send: data => broadcastToGuests(data),
+    };
+
     setupPeerConnection(conn);
+
+    conn.on('close', () => {
+      guestConns.delete(conn.peer);
+      console.log('[PeerJS Host] Guest disconnected:', conn.peer, '— remaining:', guestConns.size);
+      _updateGuestCountDisplay();
+      if (guestConns.size === 0) {
+        document.getElementById('hostWaiting').textContent = '⏳ Warte auf Gast...';
+      }
+    });
   });
 
   peer.on('error', e => {
@@ -1590,17 +1733,28 @@ function setupPeerConnection(conn) {
   
   conn.on('open', () => {
     console.log('[PeerJS] Connection opened!');
-    state.dataChannel = {
-      readyState: 'open',
-      send: data => conn.send(data)
-    };
+    // Gast: eigener Channel zum Host
+    // Host: dataChannel bleibt broadcastToGuests (gesetzt in peer.on connection)
+    if (state.isGuest) {
+      state.dataChannel = {
+        readyState: 'open',
+        send: data => conn.send(data)
+      };
+    }
     setStatus('connected', 'Verbunden ✓');
     launchInterface();
     if (document.getElementById('hostWaiting')) {
-      document.getElementById('hostWaiting').textContent = '✓ Gast verbunden';
+      _updateGuestCountDisplay();
     }
     // Audio entsperren (nochmals, falls noch nicht aktiv)
     unlockAudio();
+    // Raum-Modus und Mic-Status an neuen Gast senden
+    if (!state.isGuest) {
+      conn.send(JSON.stringify({ type: 'room_mode', mode: state.roomMode }));
+      if (state.isMicActive) {
+        conn.send(JSON.stringify({ type: 'mic_start', isHost: true }));
+      }
+    }
   });
 
   conn.on('data', async data => {
@@ -1720,6 +1874,13 @@ function setupPeerConnection(conn) {
         if (msg.text && msg.text.trim()) {
           state.latencyStart = performance.now();
           state.tSendTime = performance.now();
+          // Konferenz-Modus: Gast-Sprache an alle anderen Gäste weiterleiten
+          if (state.roomMode === 'conference') {
+            broadcastToGuestsExcept(JSON.stringify({
+              type: 'speech', text: msg.text, lang: msg.lang,
+              isFinal: msg.isFinal, sentAt: msg.sentAt, speechStart: msg.speechStart,
+            }), conn.peer);
+          }
           await handleIncomingText(msg.text, msg.lang || state.targetLang, msg.isFinal !== false);
         }
         // Original-Text auf Host anzeigen
@@ -1813,6 +1974,12 @@ function setupPeerConnection(conn) {
     }
 
     // Mikrofon-Koordination: nur ein Mikrofon gleichzeitig aktiv
+    if (msg.type === 'room_mode') {
+      state.roomMode = msg.mode;
+      _updateMicBtnState();
+      console.log('[Room] Modus:', msg.mode);
+    }
+
     if (msg.type === 'mic_start') {
       // Gast: anderes Mikrofon aktiv → Button deaktivieren
       if (state.isGuest) {
@@ -1905,6 +2072,16 @@ function collectSettings() {
 function launchInterface() {
   document.getElementById('setupSection').style.display = 'none';
   document.getElementById('mainInterface').classList.add('visible');
+  // Modus-Selector im Hauptinterface: nur für Host anzeigen
+  const rmLive = document.getElementById('roomModeSelectLive');
+  if (rmLive) {
+    rmLive.style.display = state.isGuest ? 'none' : 'inline-block';
+    rmLive.value = state.roomMode;
+  }
+  // QR/Link-Leiste: nur für Host
+  const qrBar = document.getElementById('liveQrBar');
+  if (qrBar) qrBar.style.display = state.isGuest ? 'none' : 'flex';
+  if (!state.isGuest) _updateLiveQrBar();
   document.getElementById('myLangLive').value = state.myLang;
   document.getElementById('targetLangLive').value = state.targetLang;
   document.getElementById('roomIdDisplay').textContent = state.roomId;
@@ -2181,15 +2358,18 @@ function startMic() {
 }
 
 function _updateMicBtnState() {
-  // Nur für Gäste: Mikrofon-Button sperren/entsperren je nach Remote-Mic-Status
+  // Nur für Gäste: Mikrofon-Button sperren/entsperren
   if (!state.isGuest) return;
   const btn = document.getElementById('micBtn');
   if (!btn) return;
-  if (_remoteMicActive) {
+  const blocked = _remoteMicActive || state.roomMode === 'broadcast';
+  if (blocked) {
     btn.disabled = true;
     btn.style.opacity = '0.35';
     btn.style.cursor = 'not-allowed';
-    btn.title = 'Mikrofon durch anderen Teilnehmer belegt';
+    btn.title = state.roomMode === 'broadcast'
+      ? 'Broadcast-Modus: nur Host spricht'
+      : 'Mikrofon durch anderen Teilnehmer belegt';
   } else {
     btn.disabled = false;
     btn.style.opacity = '';
@@ -3944,6 +4124,8 @@ function hangUp() {
     try { state.currentAudio.stop(); } catch(e) {}
     state.currentAudio = null;
   }
+  guestConns.forEach(conn => { try { conn.close(); } catch(e) {} });
+  guestConns.clear();
   if (peerConn) { peerConn.close(); peerConn = null; }
   if (peer) { peer.destroy(); peer = null; }
   window.speechSynthesis.cancel();
