@@ -1274,11 +1274,8 @@ function getGuestUrl(code) {
 
 function getLocalGuestUrl(code) {
   if (!state.localIp) return null;
-  // Lokale URL: kein Metered-Key nötig — im LAN keine TURN-Server erforderlich
-  const isHttps = window.location.protocol === 'https:';
-  const port = isHttps ? (':' + (window.location.port || '3443')) : ':3000';
-  const protocol = isHttps ? 'https:' : 'http:';
-  const base = protocol + '//' + state.localIp + port + window.location.pathname;
+  // HTTP leitet auf HTTPS weiter — direkt HTTPS verwenden
+  const base = 'https://' + state.localIp + ':3443' + window.location.pathname;
   return base + '?join=' + code;
 }
 
@@ -1323,34 +1320,19 @@ function updateQrCode() {
     guestUrlFullDiv.style.display = 'block';
   }
 
-  // Lokale Gast-URL (gleiches Netzwerk)
-  // HTTPS-URL bevorzugen wenn Server auf HTTP läuft (für Mikrofon-Zugriff)
-  const isOnHttps = window.location.protocol === 'https:';
-  const localUrl = isOnHttps ? getLocalGuestUrl(code) : getLocalGuestUrlHttps(code);
-  const localUrlFallback = isOnHttps ? null : getLocalGuestUrl(code);
+  // Lokale Gast-URL (gleiches Netzwerk, immer HTTPS)
+  const localUrl = getLocalGuestUrl(code);
   const localUrlDiv = document.getElementById('guestUrlLocal');
   const localUrlText = document.getElementById('guestUrlLocalText');
   if (localUrlDiv && localUrlText) {
     if (localUrl) {
       localUrlText.textContent = localUrl;
-      // Label anpassen
-      const label = localUrlDiv.querySelector('span');
-      if (label && !isOnHttps) label.textContent = '🔒 Lokal HTTPS:';
       localUrlDiv.style.display = 'block';
     } else {
       localUrlDiv.style.display = 'none';
     }
   }
-  // HTTP-Fallback URL zusätzlich anzeigen wenn auf HTTP
-  const localUrlFbDiv = document.getElementById('guestUrlLocalHttp');
-  if (localUrlFbDiv) {
-    if (!isOnHttps && localUrlFallback) {
-      document.getElementById('guestUrlLocalHttpText').textContent = localUrlFallback;
-      localUrlFbDiv.style.display = 'block';
-    } else {
-      localUrlFbDiv.style.display = 'none';
-    }
-  }
+
 
   // Externer QR (nur wenn publicBaseUrl gesetzt)
   const publicBaseCheck = document.getElementById('publicBaseUrl')?.value.trim();
@@ -1569,19 +1551,24 @@ function joinRoom() {
     console.log('[PeerJS Guest] My ID:', myId, '— connecting to:', code);
     setStatus('connecting', 'Verbinde mit Host...');
     state.roomId = code;
-    const conn = peer.connect(code, { reliable: false, serialization: 'raw' });
+    // Safari/iOS braucht reliable:false — andere Browser funktionieren mit reliable:true
+    const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+    const connOpts = isSafari
+      ? { reliable: false, serialization: 'json' }
+      : { reliable: true,  serialization: 'json' };
+    const conn = peer.connect(code, connOpts);
     peerConn = conn;
     setupPeerConnection(conn);
 
     // Timeout falls Host nicht antwortet
     setTimeout(() => {
-      if (conn.open === false || !state.dataChannel) {
+      if (!state.dataChannel) {
         setStatus('error', 'Host nicht erreichbar');
         document.getElementById('joinErrorMsg').textContent =
           'Host antwortet nicht. Ist der Code korrekt und der Host aktiv?';
         document.getElementById('joinErrorMsg').style.display = 'block';
       }
-    }, 15000);
+    }, 25000);
   });
 
   peer.on('error', e => {
