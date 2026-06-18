@@ -288,7 +288,7 @@
 
   /* Main interface */
   .main-interface { display: none; }
-  .main-interface.visible { display: flex; flex-direction: column; position: fixed; inset: 0; overflow: hidden; padding: 1.5rem; box-sizing: border-box; }
+  .main-interface.visible { display: flex; flex-direction: column; position: fixed; inset: 0; overflow-y: auto; padding: 1.5rem; box-sizing: border-box; }
 
   .lang-grid {
     display: flex;
@@ -322,6 +322,7 @@
     align-items: center;
     justify-content: space-between;
     border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
   }
 
   .lang-label {
@@ -342,10 +343,10 @@
     cursor: pointer;
   }
 
-  .lang-panel-body { padding: 1.25rem; flex: 1; }
+  .lang-panel-body { padding: 1.25rem; flex: 1; display: flex; flex-direction: column; min-height: 0; overflow: hidden; }
 
   .transcript-box {
-    min-height: 110px;
+    min-height: 2.5rem;
     background: var(--surface2);
     border-radius: 12px;
     padding: 0.9rem;
@@ -356,6 +357,7 @@
     margin-bottom: 0.75rem;
     overflow-y: auto;
     max-height: 180px;
+    flex-shrink: 1;
   }
 
   .transcript-box .placeholder { color: var(--text-dimmer); font-style: italic; }
@@ -371,7 +373,7 @@
   }
 
   .translation-box {
-    min-height: 70px;
+    min-height: 2.5rem;
     background: rgba(124,111,255,0.05);
     border: 1px solid rgba(124,111,255,0.15);
     border-radius: 12px;
@@ -382,6 +384,7 @@
     margin-bottom: 0.75rem;
     overflow-y: auto;
     max-height: 130px;
+    flex-shrink: 1;
   }
 
   /* TTS engine selector */
@@ -532,10 +535,10 @@
     border: 1px solid var(--border);
     border-radius: 20px;
     overflow: hidden;
-    flex: 1;
+    flex: 1 1 auto;
     display: flex;
     flex-direction: column;
-    min-height: 0;
+    min-height: 260px;
   }
 
   .log-header {
@@ -546,6 +549,7 @@
     background: var(--surface2);
     border-bottom: 1px solid var(--border);
     margin-bottom: 0;
+    flex-shrink: 0;
   }
 
   .log-header h3 {
@@ -1084,7 +1088,7 @@
           </div>
         </div>
         <div class="lang-panel-body" style="display:flex;flex-direction:column;gap:0.5rem;">
-          <div class="transcript-box" id="myTranscript" style="flex:1;max-height:none;min-height:60px;">
+          <div class="transcript-box" id="myTranscript" style="flex:1;max-height:none;min-height:80px;">
             <span class="placeholder">Mikrofon drücken und sprechen...</span>
           </div>
 
@@ -1145,7 +1149,7 @@
               </div>
               Google Translate...
             </div>
-            <div class="transcript-box" id="incomingOriginal" style="flex:1;min-height:60px;max-height:none;overflow-y:auto;">
+            <div class="transcript-box" id="incomingOriginal" style="flex:1;min-height:80px;max-height:none;overflow-y:auto;">
               <span class="placeholder">Warte auf Nachricht...</span>
             </div>
           </div>
@@ -1154,7 +1158,7 @@
             <div class="tts-indicator" id="ttsIndicator">
               🔊 wird vorgelesen...
             </div>
-            <div class="translation-box" id="incomingTranslation" style="flex:1;min-height:60px;max-height:none;margin-bottom:0;overflow-y:auto;">
+            <div class="translation-box" id="incomingTranslation" style="flex:1;min-height:80px;max-height:none;margin-bottom:0;overflow-y:auto;">
               <span style="color:var(--text-dimmer);font-style:italic;font-size:0.82rem;">Übersetzung erscheint hier...</span>
             </div>
           </div>
@@ -2429,13 +2433,8 @@ function updateExternQrVisibility() {
 }
 
 function updateLangGridMaxHeight() {
-  const banner = document.querySelector('#mainInterface .connection-banner');
-  const grid = document.querySelector('#mainInterface .lang-grid');
-  if (!banner || !grid) return;
-  const maxH = window.innerHeight * 0.5 - banner.getBoundingClientRect().bottom - 8;
-  grid.style.maxHeight = Math.max(80, maxH) + 'px';
+  // no-op: panels maintain natural height; page scrolls when window is too small
 }
-window.addEventListener('resize', updateLangGridMaxHeight);
 
 function toggleAdvancedSettings() {
   const panel = document.getElementById('advancedSettings');
