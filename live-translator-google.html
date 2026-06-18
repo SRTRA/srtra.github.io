@@ -415,14 +415,16 @@
   /* Center column */
 /* Mic button */
   .mic-btn {
-    width: 96px; height: 32px;
+    flex: 1 1 96px;
+    min-width: 36px;
+    height: 32px;
     border-radius: 16px;
     border: none;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     font-size: 0.9rem;
-    transition: all 0.2s;
-    flex-shrink: 0;
+    transition: width 0.2s, box-shadow 0.2s;
+    overflow: hidden;
   }
 
   .mic-btn.idle {
@@ -1073,8 +1075,8 @@
             <option value="sv">🇸🇪 Svenska sv</option>
             <option value="pl">🇵🇱 Polski pl</option>
           </select>
-          <div style="display:flex;align-items:center;gap:0.4rem;flex-shrink:0;">
-            <div class="speaking-indicator" id="speakingIndicator" style="margin-top:0;height:auto;">
+          <div style="display:flex;align-items:center;gap:0.4rem;flex:1;min-width:0;justify-content:flex-end;">
+            <div class="speaking-indicator" id="speakingIndicator" style="margin-top:0;height:auto;flex-shrink:0;">
               <div class="speaking-bars">
                 <div class="speaking-bar" style="height:3px"></div>
                 <div class="speaking-bar"></div>
