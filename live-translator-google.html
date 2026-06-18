@@ -8,28 +8,32 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0a0f;
-    --surface: #12121a;
-    --surface2: #1a1a26;
-    --border: #2a2a3e;
-    --accent: #7c6fff;
-    --accent2: #ff6f91;
-    --accent3: #6fffd4;
-    --text: #e8e8f0;
-    --text-dim: #6a6a8a;
-    --text-dimmer: #3a3a5a;
-    --success: #6fffd4;
-    --warning: #ffcc6f;
-    --google-blue: #4285f4;
+    --bg: #f0f0f8;
+    --surface: #ffffff;
+    --surface2: #e8e8f4;
+    --border: #c8c8e0;
+    --accent: #6050e8;
+    --accent2: #e8406a;
+    --accent3: #00b890;
+    --text: #1a1a2e;
+    --text-dim: #4a4a6a;
+    --text-dimmer: #8a8aaa;
+    --success: #00a878;
+    --warning: #c07800;
+    --google-blue: #1a73e8;
   }
 
   * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  html, body {
+    height: 100%;
+    overflow: hidden;
+  }
 
   body {
     background: var(--bg);
     color: var(--text);
     font-family: 'Syne', sans-serif;
-    min-height: 100vh;
     overflow-x: hidden;
   }
 
@@ -72,7 +76,7 @@
     font-size: clamp(1.2rem, 2.5vw, 1.8rem);
     font-weight: 800;
     letter-spacing: -0.03em;
-    background: linear-gradient(135deg, #fff 30%, var(--accent));
+    background: linear-gradient(135deg, #1a1a2e 30%, var(--accent));
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -259,7 +263,11 @@
     align-items: center;
     gap: 0.6rem;
     font-size: 0.85rem;
+    font-weight: 700;
     font-family: 'DM Mono', monospace;
+    color: var(--text-dim);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
   }
 
   .status-dot {
@@ -280,23 +288,31 @@
 
   /* Main interface */
   .main-interface { display: none; }
-  .main-interface.visible { display: flex; flex-direction: column; height: calc(100vh - 3rem); }
+  .main-interface.visible { display: flex; flex-direction: column; position: fixed; inset: 0; overflow: hidden; padding: 1.5rem; box-sizing: border-box; }
 
   .lang-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr 280px;
+    display: flex;
     gap: 1rem;
-    align-items: start;
+    align-items: stretch;
     margin-bottom: 1rem;
     flex-shrink: 0;
   }
 
   .lang-panel {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 20px;
     overflow: hidden;
     transition: border-color 0.3s;
+  }
+
+  .metrics-col {
+    flex: 0 0 auto;
+    min-width: fit-content;
   }
 
   .lang-panel-header {
@@ -326,7 +342,7 @@
     cursor: pointer;
   }
 
-  .lang-panel-body { padding: 1.25rem; }
+  .lang-panel-body { padding: 1.25rem; flex: 1; }
 
   .transcript-box {
     min-height: 110px;
@@ -396,8 +412,8 @@
   /* Center column */
 /* Mic button */
   .mic-btn {
-    width: 32px; height: 32px;
-    border-radius: 50%;
+    width: 96px; height: 32px;
+    border-radius: 16px;
     border: none;
     cursor: pointer;
     display: flex; align-items: center; justify-content: center;
@@ -426,6 +442,16 @@
   }
 
   .mic-btn:hover { transform: scale(1.05); }
+
+  .avatar-speaking {
+    box-shadow: 0 0 0 3px var(--accent2), 0 0 14px rgba(255,111,145,0.5);
+    animation: avatar-speaking-pulse 1.2s ease-in-out infinite;
+  }
+  @keyframes avatar-speaking-pulse {
+    0%   { box-shadow: 0 0 0 3px var(--accent2), 0 0 10px rgba(255,111,145,0.4); }
+    50%  { box-shadow: 0 0 0 5px var(--accent2), 0 0 20px rgba(255,111,145,0.7); }
+    100% { box-shadow: 0 0 0 3px var(--accent2), 0 0 10px rgba(255,111,145,0.4); }
+  }
 
   /* Indicators */
   .speaking-indicator {
@@ -505,7 +531,7 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: 20px;
-    padding: 1.5rem;
+    overflow: hidden;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -516,7 +542,10 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 1rem;
+    padding: 0.9rem 1.5rem;
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 0;
   }
 
   .log-header h3 {
@@ -535,6 +564,7 @@
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
+    padding: 1rem 1.5rem 1.5rem;
   }
 
   .log-entry {
@@ -597,8 +627,8 @@
   .hidden { display: none !important; }
 
   @media (max-width: 900px) {
-    .lang-grid { grid-template-columns: 1fr; }
-    .metrics-col { display: none; }
+    .lang-grid { flex-direction: column; }
+    .metrics-col { display: none !important; }
 }
 
   /* Guest URL Banner */
@@ -756,8 +786,9 @@
 <body>
 <div class="container">
 
-  <header>
+  <header style="position:relative;">
     <h1>LiveTranslate</h1>
+    <button onclick="showHelp()" title="Hilfe" style="position:absolute;top:0;right:0;width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;font-weight:700;">?</button>
   </header>
 
   <!-- SETUP -->
@@ -783,7 +814,7 @@
 
       <!-- Hidden selects for collectSettings() — Sprache wird live in den Panels gewählt -->
       <input type="hidden" id="myLangSelect" value="auto">
-      <input type="hidden" id="targetLangSelect" value="en">
+      <input type="hidden" id="targetLangSelect" value="de">
 
       <!-- Schritt 2.5: STT-Optionen -->
       <div class="step-row">
@@ -827,7 +858,7 @@
                       style="font-size:0.72rem;font-family:'DM Mono',monospace;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);padding:0.2rem 0.4rem;cursor:pointer;">
                       <option value="broadcast">📢 Broadcast — nur Host spricht</option>
                       <option value="hub">🎙 Hub — alle sprechen, Gäste hören Host</option>
-                      <option value="conference">🔁 Konferenz — alle hören alle</option>
+                      <option value="conference" selected>🔁 Konferenz — alle hören alle</option>
                     </select>
                   </div>
                   <div id="guestUrlFull" style="margin-top:0.6rem;font-size:0.65rem;font-family:'DM Mono',monospace;color:var(--text-dimmer);background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:0.35rem 0.6rem;word-break:break-all;display:none;">
@@ -889,17 +920,17 @@
   </div>
 
   <!-- TAP-TO-JOIN OVERLAY — User-Gesture für Audio + Verbindungsaufbau -->
-  <div id="tapToJoinOverlay" style="display:none;position:fixed;inset:0;z-index:10000;background:rgba(10,10,15,0.97);align-items:center;justify-content:center;flex-direction:column;gap:1.2rem;">
+  <div id="tapToJoinOverlay" style="display:none;position:fixed;inset:0;z-index:10000;background:var(--bg);align-items:center;justify-content:center;flex-direction:column;gap:1.2rem;">
     <div style="font-size:3rem;">🎧</div>
-    <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;color:white;text-align:center;">LiveTranslate</div>
+    <div style="font-family:'Syne',sans-serif;font-size:1.4rem;font-weight:700;color:var(--text);text-align:center;">LiveTranslate</div>
     <div style="font-family:'DM Mono',monospace;font-size:0.85rem;color:var(--text-dim);text-align:center;">Tippen um beizutreten und Audio zu aktivieren</div>
     <button onclick="tapToJoin()" style="background:linear-gradient(135deg,var(--accent),#5a4fff);color:white;border:none;border-radius:14px;padding:1rem 3rem;font-family:'Syne',sans-serif;font-weight:700;font-size:1.1rem;cursor:pointer;box-shadow:0 8px 32px rgba(124,111,255,0.5);margin-top:0.5rem;">▶ Beitreten</button>
   </div>
 
   <!-- AUDIO UNLOCK OVERLAY (für Gast nach Auto-Join) -->
-  <div id="audioUnlockOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(10,10,15,0.92);align-items:center;justify-content:center;flex-direction:column;gap:1rem;">
+  <div id="audioUnlockOverlay" style="display:none;position:fixed;inset:0;z-index:9999;background:var(--bg);align-items:center;justify-content:center;flex-direction:column;gap:1rem;">
     <div style="font-size:2rem;">🔊</div>
-    <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:white;">Bereit zum Empfangen</div>
+    <div style="font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:700;color:var(--text);">Bereit zum Empfangen</div>
     <div style="font-family:'DM Mono',monospace;font-size:0.82rem;color:var(--text-dim);margin-bottom:0.5rem;">Tippen um Audio zu aktivieren</div>
     <button onclick="activateAudio()" style="background:linear-gradient(135deg,var(--accent),#5a4fff);color:white;border:none;border-radius:12px;padding:0.9rem 2.5rem;font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;box-shadow:0 6px 24px rgba(124,111,255,0.4);">▶ Audio aktivieren</button>
   </div>
@@ -907,89 +938,120 @@
   <!-- MAIN INTERFACE -->
   <div id="mainInterface" class="main-interface">
 
-    <div class="connection-banner">
-      <div class="connection-status">
-        <div class="status-dot" id="statusDot"></div>
-        <span id="statusText">Verbinde...</span>
+    <div class="connection-banner" style="align-items:center;gap:0.5rem 1rem;">
+      <!-- Eigener Avatar -->
+      <div id="myOwnAvatar" style="width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;background:var(--surface2);border:2px solid var(--border);"></div>
+      <!-- Gast: gerade sprechender Avatar (nur wenn jemand anderes spricht) -->
+      <div id="activeSpeakerDisplay" style="display:none;width:52px;height:52px;border-radius:50%;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;"></div>
+      <!-- Status + Raum (kann schrumpfen) -->
+      <div style="display:flex;align-items:center;gap:0.8rem;flex:1 1 auto;min-width:0;flex-wrap:nowrap;">
+        <div class="connection-status">
+          <div class="status-dot" id="statusDot"></div>
+          <span id="statusText">Verbinde...</span>
+        </div>
+        <div style="font-family:'DM Mono',monospace;font-size:0.85rem;font-weight:700;color:var(--text-dim);letter-spacing:0.05em;text-transform:uppercase;display:flex;align-items:center;gap:0.6rem;white-space:nowrap;">
+          Raum: <a id="roomIdDisplay" href="#" onclick="const u=document.getElementById('liveUrlLocal')?.textContent||document.getElementById('liveUrlExtern')?.textContent;if(u&&u!=='—')window.open(u,'_blank');return false;" style="color:var(--accent);text-decoration:none;cursor:pointer;font-weight:700;text-transform:none;" title="Gast-Link öffnen">—</a>
+          <span id="liveGuestCount" style="font-size:0.72rem;color:var(--text-dimmer);"></span>
+        </div>
       </div>
-      <div style="font-family:'DM Mono',monospace;font-size:0.8rem;color:var(--text-dim);">
-        Raum: <span style="color:var(--accent)" id="roomIdDisplay">—</span>
-      </div>
-      <div style="margin-left:auto;display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;">
-        <label title="Wartezeit nach dem letzten erkannten Wort, bevor der Satz zur Übersetzung gesendet wird. Kürzere Werte reagieren schneller, können aber Sätze zu früh abschneiden. Standard: 300 ms." style="display:flex;align-items:center;gap:0.3rem;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text-dim);white-space:nowrap;">
-          Debounce
-          <input type="number" id="debounceMs" value="1000" min="100" max="2000" step="50" onchange="state.debounceMs=parseInt(this.value)||1000;" style="width:54px;padding:0.2rem 0.35rem;font-size:0.75rem;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;" />
-          ms
-        </label>
-        <label title="Übersetzung und Sprachausgabe starten bereits während des Sprechens, ohne auf das Satzende zu warten. Reduziert die wahrgenommene Verzögerung," style="display:flex;align-items:center;gap:0.3rem;cursor:pointer;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text-dim);white-space:nowrap;">
-          <input type="checkbox" id="interimMode" checked style="width:14px;height:14px;accent-color:var(--accent3);cursor:pointer;" onchange="updateInterimUI();state.interimMode=this.checked;" />
-          Interim-Modus
-        </label>
-
-        <label title="Anzahl neuer Wörter die erkannt sein müssen, bevor ein Interim-Fragment zur Übersetzung gesendet wird. Kleinere Werte reagieren früher, grössere Werte liefern stabilere Übersetzungen. Standard: 3." style="display:flex;align-items:center;gap:0.3rem;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text-dim);white-space:nowrap;">
-          <input type="number" id="interimWordCount" value="5" min="1" max="10" step="1" onchange="state.interimWordCount=parseInt(this.value)||5;" style="width:40px;padding:0.2rem 0.35rem;font-size:0.75rem;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;" />
-          Wörter
-        </label>
-        <label title="AI als Bewerter&#10;&#10;Nach jeder Übersetzung bewertet die AI im Hintergrund: Genauigkeit, Flüssigkeit, Natürlichkeit (je 1–5 ⭐)." style="display:flex;align-items:center;gap:0.3rem;cursor:pointer;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text-dim);white-space:nowrap;">
-          <input type="checkbox" id="qualityEval" checked onchange="updateQualityPanel()" style="width:14px;height:14px;accent-color:var(--warning);cursor:pointer;" />
-          Qualitätsbewertung
-        </label>
-        <select id="translateEngine" onchange="updateInterimUI();state.translateEngine=this.value;localStorage.setItem('lt_translate_engine',this.value);" title="Übersetzungs-Engine" style="padding:0.35rem 0.5rem;font-size:0.75rem;width:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);">
-          <option value="google" title="Mechanisch exakt, ~50ms. Empfohlen für Echtzeit.">🔵 Google</option>
-          <option value="groq" title="Dolmetscher-Stil, Gesprächskontext-bewusst, ~200–400ms.">🟣 Groq AI</option>
-        </select>
-        <select id="ttsQuality" onchange="state.ttsQuality=this.value; state.selectedVoiceName=''; loadGoogleVoices(state.targetLang);" title="Stimmqualität" style="padding:0.35rem 0.5rem;font-size:0.75rem;width:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);">
-          <option value="neural2" title="Neural2 — beste Qualität&#10;Natürlichste Aussprache, WaveNet-Nachfolger&#10;Google Cloud TTS API">⭐⭐⭐ Neural2</option>
-          <option value="wavenet" title="WaveNet — sehr natürlich&#10;Bewährte neuronale Stimmen&#10;Google Cloud TTS API">⭐⭐ WaveNet</option>
-          <option value="standard" title="Standard — schnell &amp; günstig&#10;Einfache synthetische Stimmen&#10;Google Cloud TTS API">⭐ Standard</option>
-          <option value="browser" title="Browser TTS — kostenlos&#10;Keine API nötig&#10;Qualität abhängig vom Betriebssystem">🌐 Browser TTS</option>
-        </select>
-        <button class="btn btn-danger" onclick="hangUp()" style="padding:0.4rem 0.8rem;font-size:0.78rem;">✕ Beenden</button>
+      <!-- Buttons: bricht als Ganzes um -->
+      <div style="display:flex;gap:0.5rem;align-items:center;flex-shrink:0;flex-wrap:nowrap;">
+        <button id="hangUpBtn" class="btn btn-danger" onclick="hangUp()" style="padding:0.4rem 0.8rem;font-size:0.78rem;">✕ Beenden</button>
         <!-- Raum-Modus: nur auf Host sichtbar -->
         <select id="roomModeSelectLive" onchange="setRoomMode(this.value)"
-          style="display:none;padding:0.35rem 0.5rem;font-size:0.75rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);"
+          style="display:none;padding:0.35rem 0.5rem;font-size:0.75rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);width:fit-content;"
           title="Raum-Modus">
           <option value="broadcast">📢 Broadcast</option>
           <option value="hub">🎙 Hub</option>
           <option value="conference">🔁 Konferenz</option>
         </select>
+        <button id="settingsToggleBtn" onclick="toggleAdvancedSettings()" title="Einstellungen" style="flex-shrink:0;width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">⚙</button>
+        <button onclick="showHelp()" title="Hilfe" style="flex-shrink:0;width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;font-weight:700;">?</button>
       </div>
-    </div>
-
-    <!-- QR/Link-Leiste: nur für Host sichtbar -->
-    <div id="liveQrBar" style="display:none;background:var(--surface);border-bottom:1px solid var(--border);padding:0.5rem 1rem;align-items:center;gap:1rem;flex-wrap:wrap;">
-      <!-- Lokal -->
-      <div style="display:flex;align-items:center;gap:0.4rem;">
+      <!-- Gast-Avatare (nur Host, volle Breite) -->
+      <div id="guestAvatarRow" style="display:none;flex-basis:100%;order:50;align-items:center;gap:0.4rem;padding-top:0.1rem;"></div>
+      <!-- Erweiterte Einstellungen (ausklappbar, volle Breite) -->
+      <div id="advancedSettings" style="display:none;flex-basis:100%;order:99;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:0.5rem 0.6rem;">
+          <div style="display:flex;flex-wrap:wrap;gap:0.4rem;align-items:center;">
+          <label id="settingDebounce" title="Wartezeit nach dem letzten erkannten Wort, bevor der Satz zur Übersetzung gesendet wird. Kürzere Werte reagieren schneller, können aber Sätze zu früh abschneiden. Standard: 300 ms." style="display:flex;align-items:center;gap:0.3rem;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text-dim);white-space:nowrap;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.3rem 0.6rem;">
+            Debounce
+            <input type="number" id="debounceMs" value="1000" min="100" max="2000" step="50" onchange="state.debounceMs=parseInt(this.value)||1000;broadcastSettings();" style="width:72px;padding:0.2rem 0.35rem;font-size:0.75rem;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;" />
+            ms
+          </label>
+          <label id="settingInterimMode" title="Übersetzung und Sprachausgabe starten bereits während des Sprechens, ohne auf das Satzende zu warten. Reduziert die wahrgenommene Verzögerung," style="display:flex;align-items:center;gap:0.3rem;cursor:pointer;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text-dim);white-space:nowrap;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.3rem 0.6rem;">
+            <input type="checkbox" id="interimMode" style="width:14px;height:14px;accent-color:var(--accent3);cursor:pointer;" onchange="updateInterimUI();state.interimMode=this.checked;broadcastSettings();" />
+            Dolmetscher-Modus
+          </label>
+          <label id="settingWordCount" title="Anzahl neuer Wörter die erkannt sein müssen, bevor ein Interim-Fragment zur Übersetzung gesendet wird. Kleinere Werte reagieren früher, grössere Werte liefern stabilere Übersetzungen. Standard: 3." style="display:flex;align-items:center;gap:0.3rem;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text-dim);white-space:nowrap;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.3rem 0.6rem;">
+            <input type="number" id="interimWordCount" value="5" min="1" max="10" step="1" onchange="state.interimWordCount=parseInt(this.value)||5;broadcastSettings();" style="width:40px;padding:0.2rem 0.35rem;font-size:0.75rem;text-align:center;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;" />
+            Wörter
+          </label>
+          <label title="AI als Bewerter&#10;&#10;Nach jeder Übersetzung bewertet die AI im Hintergrund: Genauigkeit, Flüssigkeit, Natürlichkeit (je 1–5 ⭐)." style="display:flex;align-items:center;gap:0.3rem;cursor:pointer;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text-dim);white-space:nowrap;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.3rem 0.6rem;">
+            <input type="checkbox" id="qualityEval" onchange="updateQualityPanel()" style="width:14px;height:14px;accent-color:var(--warning);cursor:pointer;" />
+            Qualitätsbewertung
+          </label>
+          <label style="display:flex;align-items:center;gap:0.3rem;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text-dim);white-space:nowrap;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.3rem 0.6rem;">
+            Übersetzungs-Engine
+            <select id="translateEngine" onchange="updateInterimUI();state.translateEngine=this.value;localStorage.setItem('lt_translate_engine',this.value);" title="Übersetzungs-Engine" style="padding:0.2rem 0.4rem;font-size:0.75rem;width:auto;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);">
+              <option value="google" title="Mechanisch exakt, ~50ms. Empfohlen für Echtzeit.">🔵 Google</option>
+              <option value="groq" title="Dolmetscher-Stil, Gesprächskontext-bewusst, ~200–400ms.">🟣 Groq AI</option>
+            </select>
+          </label>
+          <label style="display:flex;align-items:center;gap:0.3rem;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text-dim);white-space:nowrap;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.3rem 0.6rem;">
+            Stimmqualität
+            <select id="ttsQuality" onchange="state.ttsQuality=this.value; state.selectedVoiceName=''; loadGoogleVoices(state.targetLang);" title="Stimmqualität" style="padding:0.2rem 0.4rem;font-size:0.75rem;width:auto;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);">
+              <option value="neural2" title="Neural2 — beste Qualität&#10;Natürlichste Aussprache, WaveNet-Nachfolger&#10;Google Cloud TTS API">⭐⭐⭐ Neural2</option>
+              <option value="wavenet" title="WaveNet — sehr natürlich&#10;Bewährte neuronale Stimmen&#10;Google Cloud TTS API">⭐⭐ WaveNet</option>
+              <option value="standard" title="Standard — schnell &amp; günstig&#10;Einfache synthetische Stimmen&#10;Google Cloud TTS API">⭐ Standard</option>
+              <option value="browser" title="Browser TTS — kostenlos&#10;Keine API nötig&#10;Qualität abhängig vom Betriebssystem">🌐 Browser TTS</option>
+            </select>
+          </label>
+          <label style="display:flex;align-items:center;gap:0.3rem;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text-dim);white-space:nowrap;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.3rem 0.6rem;">
+            Stimme
+            <select id="voiceSelect" onchange="updateVoice()" style="padding:0.2rem 0.4rem;font-size:0.75rem;width:auto;max-width:180px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);">
+              <option value="">🔊 Stimme lädt...</option>
+            </select>
+          </label>
+          <label id="settingTypewriter" title="Typewriter-Eingabe anzeigen: Text zeichenweise als Spracheingabe simulieren." style="display:flex;align-items:center;gap:0.3rem;cursor:pointer;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text-dim);white-space:nowrap;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.3rem 0.6rem;">
+            <input type="checkbox" id="showTypewriter" onchange="updateTypewriterVisibility()" style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer;" />
+            Typewriter
+          </label>
+          <label id="settingLocalQr" title="Lokalen QR-Code und Link für Gäste im gleichen Netzwerk anzeigen." style="display:flex;align-items:center;gap:0.3rem;cursor:pointer;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text-dim);white-space:nowrap;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.3rem 0.6rem;">
+            <input type="checkbox" id="showLocalQr" checked onchange="updateLocalQrVisibility()" style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer;" />
+            Lokaler QR-Code
+          </label>
+          <label id="settingExternQr" title="Externen QR-Code und Link für Gäste ausserhalb des lokalen Netzwerks anzeigen." style="display:flex;align-items:center;gap:0.3rem;cursor:pointer;font-family:'DM Mono',monospace;font-size:0.75rem;color:var(--text-dim);white-space:nowrap;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:0.3rem 0.6rem;">
+            <input type="checkbox" id="showExternQr" onchange="updateExternQrVisibility()" style="width:14px;height:14px;accent-color:var(--accent);cursor:pointer;" />
+            Externer QR-Code
+          </label>
+          </div>
+        </div>
+      <!-- Lokal-QR -->
+      <div id="liveQrBar" style="display:none;align-items:center;gap:0.4rem;">
         <div id="liveQrLocal" style="background:white;padding:5px;border-radius:8px;flex-shrink:0;"></div>
+        <span id="liveUrlLocal" style="display:none;">—</span>
         <div style="display:flex;flex-direction:column;gap:0.2rem;">
-          <span style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--accent);">🏠 Lokal</span>
-          <span id="liveUrlLocal" style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text-dimmer);word-break:break-all;max-width:200px;">—</span>
-          <div style="display:flex;gap:0.3rem;">
-            <button onclick="window.open(document.getElementById('liveUrlLocal').textContent,'_blank')" style="background:transparent;border:none;cursor:pointer;color:var(--accent);font-size:0.8rem;padding:0;" title="Öffnen">↗</button>
-            <button onclick="copyUrl(this,'liveUrlLocal')" style="background:transparent;border:none;cursor:pointer;color:var(--text-dim);font-size:0.75rem;padding:0;" title="Kopieren">📋</button>
-          </div>
+          <button onclick="window.open(document.getElementById('liveUrlLocal').textContent,'_blank')" style="width:30px;height:30px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;cursor:pointer;color:var(--accent);font-size:1rem;display:flex;align-items:center;justify-content:center;" title="Öffnen">↗</button>
+          <button onclick="copyUrl(this,'liveUrlLocal')" style="width:30px;height:30px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;cursor:pointer;color:var(--text-dim);font-size:0.9rem;display:flex;align-items:center;justify-content:center;" title="Kopieren">📋</button>
         </div>
       </div>
-      <!-- Extern -->
-      <div style="display:flex;align-items:center;gap:0.4rem;">
+      <!-- Extern-QR: ganz rechts -->
+      <div id="liveQrBarExtern" style="display:none;align-items:center;gap:0.4rem;flex-shrink:0;margin-left:auto;">
         <div id="liveQrExtern" style="background:white;padding:5px;border-radius:8px;flex-shrink:0;"></div>
-        <div style="display:flex;flex-direction:column;gap:0.2rem;">
+        <div style="display:flex;flex-direction:column;gap:0.2rem;align-items:center;">
           <span style="font-family:'DM Mono',monospace;font-size:0.62rem;color:var(--accent3);">🌐 Extern</span>
-          <span id="liveUrlExtern" style="font-family:'DM Mono',monospace;font-size:0.58rem;color:var(--text-dimmer);word-break:break-all;max-width:200px;">—</span>
-          <div style="display:flex;gap:0.3rem;">
-            <button onclick="window.open(document.getElementById('liveUrlExtern').textContent,'_blank')" style="background:transparent;border:none;cursor:pointer;color:var(--accent3);font-size:0.8rem;padding:0;" title="Öffnen">↗</button>
-            <button onclick="copyUrl(this,'liveUrlExtern')" style="background:transparent;border:none;cursor:pointer;color:var(--text-dim);font-size:0.75rem;padding:0;" title="Kopieren">📋</button>
-          </div>
+          <span id="liveUrlExtern" style="display:none;">—</span>
+          <button onclick="window.open(document.getElementById('liveUrlExtern').textContent,'_blank')" style="width:30px;height:30px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;cursor:pointer;color:var(--accent3);font-size:1rem;display:flex;align-items:center;justify-content:center;" title="Öffnen">↗</button>
+          <button onclick="copyUrl(this,'liveUrlExtern')" style="width:30px;height:30px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;cursor:pointer;color:var(--text-dim);font-size:0.9rem;display:flex;align-items:center;justify-content:center;" title="Kopieren">📋</button>
         </div>
       </div>
-      <span id="liveGuestCount" style="font-family:'DM Mono',monospace;font-size:0.68rem;color:var(--text-dimmer);margin-left:auto;"></span>
     </div>
 
     <div class="lang-grid">
       <!-- MY PANEL -->
       <div class="lang-panel">
-        <div class="lang-panel-header" style="gap:0;">
-          <span class="lang-label">Ich spreche</span> <select id="myLangLive" onchange="updateMyLang()" style="background:transparent;border:none;color:var(--text);font-family:'DM Mono',monospace;font-size:0.82rem;padding:0.1rem;cursor:pointer;outline:none;flex:1;">
+        <div class="lang-panel-header" style="gap:0.75rem;">
+          <span class="lang-label">Ich spreche</span> <select id="myLangLive" onchange="updateMyLang()" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.75rem;padding:0.25rem 0.45rem;cursor:pointer;outline:none;flex:none;width:160px;min-width:0;">
             <option value="auto">🌐 Automatisch</option>
             <option value="de">🇩🇪 Deutsch de</option>
             <option value="en">🇬🇧 English en</option>
@@ -1017,32 +1079,29 @@
             </div>
             <button class="mic-btn idle" id="micBtn" onclick="toggleMic()"
               title="Zum Sprechen drücken">🎤</button>
+          <button onclick="clearMyPanel()" title="Felder leeren"
+            style="flex-shrink:0;width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--text-dimmer);cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center;">🗑</button>
           </div>
         </div>
         <div class="lang-panel-body" style="display:flex;flex-direction:column;gap:0.5rem;">
           <div class="transcript-box" id="myTranscript" style="flex:1;max-height:none;min-height:60px;">
             <span class="placeholder">Mikrofon drücken und sprechen...</span>
           </div>
-          <div style="display:flex;gap:0.4rem;align-items:flex-end;">
-            <textarea id="textInput" placeholder="Text eingeben..."
-              style="flex:1;resize:none;min-height:38px;max-height:120px;overflow-y:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:0.5rem 0.75rem;font-family:'DM Mono',monospace;font-size:0.82rem;line-height:1.4;outline:none;transition:border-color 0.2s;"
-              rows="1"
-              oninput="onTextInput(this)"
-              onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendTextInput();}"></textarea>
-            <button onclick="clearTextInput()" title="Löschen" id="textInputClearBtn" style="flex-shrink:0;width:34px;height:34px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text-dim);cursor:pointer;font-size:0.9rem;display:none;align-items:center;justify-content:center;">✕</button>
-            <button onclick="sendTextInput()" title="Senden (Enter)"
-              style="flex-shrink:0;width:34px;height:34px;border-radius:8px;border:none;background:var(--accent);color:white;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all 0.2s;"
-              onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">↵</button>
-          </div>
+
 
           <!-- Typewriter-Eingabe -->
-          <div style="border-top:1px solid var(--border);padding-top:0.5rem;display:flex;flex-direction:column;gap:0.4rem;">
+          <div id="typewriterPanel" style="border-top:1px solid var(--border);padding-top:0.5rem;display:none;flex-direction:column;gap:0.4rem;">
             <textarea id="typewriterSource" placeholder="Typewriter-Text hier eingeben…"
               style="flex:1;resize:none;min-height:52px;max-height:160px;overflow-y:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);padding:0.5rem 0.75rem;font-family:'DM Mono',monospace;font-size:0.82rem;line-height:1.4;outline:none;"
               rows="2"></textarea>
             <div style="display:flex;align-items:center;gap:0.5rem;">
-              <button id="typewriterPlayBtn" onclick="toggleTypewriter()"
+              <button id="typewriterPlayBtn" onclick="toggleTypewriter()" title="Abspielen"
                 style="flex-shrink:0;width:34px;height:34px;border-radius:8px;border:none;background:var(--accent3);color:white;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;">▶</button>
+              <button id="typewriterStopBtn" onclick="stopTypewriterFull()" title="Stoppen" disabled
+                style="flex-shrink:0;width:34px;height:34px;border-radius:8px;border:none;background:var(--surface2);color:var(--text-dimmer);cursor:not-allowed;font-size:1rem;display:flex;align-items:center;justify-content:center;border:1px solid var(--border);">⏹</button>
+              <button onclick="sendTypewriterText()" title="Senden (kompletter Text)"
+                style="flex-shrink:0;width:34px;height:34px;border-radius:8px;border:none;background:var(--accent);color:white;cursor:pointer;font-size:1rem;display:flex;align-items:center;justify-content:center;transition:all 0.2s;"
+                onmouseover="this.style.opacity='0.85'" onmouseout="this.style.opacity='1'">↵</button>
               <input type="range" id="typewriterSpeed" min="1" max="20" value="5"
                 title="Tipp-Geschwindigkeit (Zeichen pro Sekunde)"
                 style="flex:1;accent-color:var(--accent3);cursor:pointer;"
@@ -1057,10 +1116,10 @@
 
       <!-- OTHER PANEL -->
       <div class="lang-panel">
-        <div class="lang-panel-header" style="gap:0;">
-          <span class="lang-label">Ich höre</span> <select id="targetLangLive" onchange="updateTargetLang()" style="background:transparent;border:none;color:var(--text);font-family:'DM Mono',monospace;font-size:0.82rem;padding:0.1rem;cursor:pointer;outline:none;flex:1;">
+        <div class="lang-panel-header" style="gap:0.75rem;">
+          <span class="lang-label">Ich höre</span> <select id="targetLangLive" onchange="updateTargetLang()" style="background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:'DM Mono',monospace;font-size:0.75rem;padding:0.25rem 0.45rem;cursor:pointer;outline:none;flex:none;width:160px;min-width:0;">
             <option value="en">🇬🇧 English en</option>
-            <option value="de">🇩🇪 Deutsch de</option>
+            <option value="de" selected>🇩🇪 Deutsch de</option>
             <option value="fr">🇫🇷 Français fr</option>
             <option value="es">🇪🇸 Español es</option>
             <option value="it">🇮🇹 Italiano it</option>
@@ -1074,35 +1133,38 @@
             <option value="sv">🇸🇪 Svenska sv</option>
             <option value="pl">🇵🇱 Polski pl</option>
           </select>
-          <select id="voiceSelect" onchange="updateVoice()" style="background:transparent;border:none;color:var(--text);font-family:'DM Mono',monospace;font-size:0.78rem;padding:0.1rem;cursor:pointer;outline:none;flex-shrink:0;max-width:130px;">
-            <option value="">🔊 Stimme lädt...</option>
-          </select>
+          <button onclick="clearOtherPanel()" title="Felder leeren"
+            style="flex-shrink:0;width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--text-dimmer);cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center;">🗑</button>
         </div>
-        <div class="lang-panel-body">
-          <div class="section-label">📥 EINGEHEND (ORIGINAL)</div>
-          <div class="transcript-box" id="incomingOriginal" style="min-height:70px;max-height:120px;">
-            <span class="placeholder">Warte auf Nachricht...</span>
-          </div>
-          <div class="translating-indicator" id="translatingIndicator">
-            <div class="translating-dots">
-              <span></span><span></span><span></span>
+        <div class="lang-panel-body" style="display:flex;flex-direction:column;gap:0.4rem;min-height:0;">
+          <div style="display:flex;flex-direction:column;flex:1;min-height:0;gap:0.2rem;">
+            <div class="section-label" style="margin-bottom:0;">📥 EINGEHEND (ORIGINAL)</div>
+            <div class="translating-indicator" id="translatingIndicator">
+              <div class="translating-dots">
+                <span></span><span></span><span></span>
+              </div>
+              Google Translate...
             </div>
-            Google Translate...
+            <div class="transcript-box" id="incomingOriginal" style="flex:1;min-height:60px;max-height:none;overflow-y:auto;">
+              <span class="placeholder">Warte auf Nachricht...</span>
+            </div>
           </div>
-          <div class="section-label">✨ ÜBERSETZUNG</div>
-          <div class="translation-box" id="incomingTranslation">
-            <span style="color:var(--text-dimmer);font-style:italic;font-size:0.82rem;">Übersetzung erscheint hier...</span>
-          </div>
-          <div class="tts-indicator" id="ttsIndicator">
-            🔊 wird vorgelesen...
+          <div style="display:flex;flex-direction:column;flex:1;min-height:0;gap:0.2rem;">
+            <div class="section-label" style="margin-bottom:0;">✨ ÜBERSETZUNG</div>
+            <div class="tts-indicator" id="ttsIndicator">
+              🔊 wird vorgelesen...
+            </div>
+            <div class="translation-box" id="incomingTranslation" style="flex:1;min-height:60px;max-height:none;margin-bottom:0;overflow-y:auto;">
+              <span style="color:var(--text-dimmer);font-style:italic;font-size:0.82rem;">Übersetzung erscheint hier...</span>
+            </div>
           </div>
         </div>
       </div>
 
       <!-- METRICS COLUMN -->
-      <div class="metrics-col" style="display:flex;flex-direction:column;gap:0.75rem;">
+      <div class="metrics-col" style="display:none;flex-direction:column;gap:0.75rem;">
         <!-- Latenz -->
-        <div id="latencyPanel" style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:0.9rem 1rem;">
+        <div id="latencyPanel" style="background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:0.9rem 1rem;display:none;">
           <div style="font-family:'DM Mono',monospace;font-size:0.65rem;color:var(--text-dimmer);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:0.5rem;">
             ⏱ Latenz — <span id="latencyCount" style="color:var(--text-dim);">0 Messungen</span>
           </div>
@@ -1156,14 +1218,18 @@
     <!-- Conversation Log -->
     <div class="conversation-log">
       <div class="log-header">
-        <h3>📋 Gesprächsprotokoll <span style="font-size:0.65rem;font-weight:400;color:var(--text-dim);font-family:'DM Mono',monospace;letter-spacing:0;text-transform:none;">(STT: > = Interim &nbsp; < = Debounce &nbsp; | = Wörter &nbsp; { = Debounce &nbsp; [ = Intervall &nbsp; \ = Einzel-Fragment &nbsp; &amp; = Multi-Fragment)</span></h3>
-        <button class="btn btn-secondary" onclick="clearLog()" style="padding:0.3rem 0.75rem;font-size:0.73rem;">Löschen</button>
-      </div>
-      <div class="log-entries" id="logEntries">
-        <div style="color:var(--text-dimmer);font-family:'DM Mono',monospace;font-size:0.78rem;text-align:center;padding:1rem;">
-          Gespräch noch nicht gestartet...
+        <h3>📋 Gesprächsprotokoll <span id="logLegend" style="font-size:0.65rem;font-weight:400;color:var(--text-dim);font-family:'DM Mono',monospace;letter-spacing:0;text-transform:none;">(STT: > = Interim &nbsp; < = Debounce &nbsp; | = Wörter &nbsp; { = Debounce &nbsp; [ = Intervall &nbsp; \ = Einzel-Fragment &nbsp; &amp; = Multi-Fragment)</span></h3>
+        <div style="display:flex;align-items:center;gap:0.4rem;">
+          <select id="logLevelSelect" onchange="setLogLevel(this.value)" title="Log-Detaillierung"
+            style="padding:0.25rem 0.45rem;font-size:0.72rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text-dim);font-family:'DM Mono',monospace;cursor:pointer;">
+            <option value="chat" selected>💬 Gespräch</option>
+            <option value="info">ℹ️ Info</option>
+            <option value="debug">🐛 Debug</option>
+          </select>
+          <button onclick="clearLog()" title="Protokoll löschen" style="flex-shrink:0;width:28px;height:28px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--text-dimmer);cursor:pointer;font-size:0.85rem;display:flex;align-items:center;justify-content:center;">🗑</button>
         </div>
       </div>
+      <div class="log-entries" id="logEntries"></div>
     </div>
 
   </div>
@@ -1223,14 +1289,15 @@ const googleTranslateLang = {
 let state = {
   apiKey: localStorage.getItem('lt_google_apikey') || '',
   myLang: 'auto',
-  targetLang: 'en',
+  targetLang: 'de',
   ttsQuality: 'neural2',
   debounceMs: 1000,
-  interimMode: true,
+  logLevel: 'chat', // immer mit 'chat' starten
+  interimMode: false,
   interimWordCount: 5,
   mode: 'host',
   isMicActive: false,
-  roomMode: 'broadcast',  // 'broadcast' | 'hub' | 'conference'
+  roomMode: 'conference',  // 'broadcast' | 'hub' | 'conference'
   recognition: null,
   pc: null,
   dataChannel: null,
@@ -1249,7 +1316,8 @@ let state = {
   tTranslateDone: 0,   // after translation API returns
   lat: { stt:[], trans:[], tts:[], total:[] }, // per-phase history
   lastLatency: null,     // letzte Messung für Log
-  pendingLogEntry: null,  // wartet auf Latenzwerte
+  lastDetectedLang: null,  // zuletzt von Google erkannte Quellsprache
+  pendingLogEntry: null,   // wartet auf Latenzwerte
   qualityEval: false,     // Groq-Qualitätsbewertung aktiv
   qualityScores: { accuracy:[], fluency:[], naturalness:[] }, // Historie
   interimFragments: [], // Gesendete Interim-Fragmente für Log
@@ -1479,6 +1547,23 @@ function setMode(mode, btn) {
 let peer = null;
 let peerConn = null;            // Gast: Verbindung zum Host
 const guestConns = new Map();   // Host: alle Gast-Verbindungen {peerId → conn}
+const _PEER_AVATARS = [
+  '🧑','👩','🧔','👱','🧓','🧑‍💻','👩‍💼','🧑‍🎨','🦊','🐼',
+  '🐯','🦁','🐸','🦝','🐺','🦄','🐧','🦋','🐙','🦀',
+];
+function _peerHash(id) {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) & 0xffffff;
+  return h;
+}
+function _peerAvatarData(peerId) {
+  const h = _peerHash(peerId);
+  const avatar = _PEER_AVATARS[(h & 0xff) % _PEER_AVATARS.length];
+  const hue = Math.round(((h >> 8) & 0xff) / 255 * 360);
+  const bg = `linear-gradient(135deg,hsl(${hue},65%,40%),hsl(${(hue+40)%360},75%,58%))`;
+  return { avatar, bg };
+}
+let _currentIncomingPeer = null;
 
 // Raum-Modus
 // 'broadcast'   — nur Host spricht, Gäste hören
@@ -1540,6 +1625,16 @@ async function fetchIceServers() {
 
 // Nachricht an alle verbundenen Gäste senden
 // ── Raum-Modus ──────────────────────────────────────────────
+function broadcastSettings() {
+  if (state.isGuest) return;
+  broadcastToGuests(JSON.stringify({
+    type: 'host_settings',
+    debounceMs: state.debounceMs,
+    interimMode: state.interimMode,
+    interimWordCount: state.interimWordCount,
+  }));
+}
+
 function setRoomMode(mode) {
   state.roomMode = mode;
   // Beide Selectors synchronisieren
@@ -1551,10 +1646,19 @@ function setRoomMode(mode) {
   broadcastToGuests(JSON.stringify({ type: 'room_mode', mode }));
   // Bei Broadcast: alle Gäste auffordern ihr Mikrofon zu stoppen
   if (mode === 'broadcast') {
-    broadcastToGuests(JSON.stringify({ type: 'mic_start', isHost: true }));
+    broadcastToGuests(JSON.stringify({ type: 'mic_start', isHost: true, speakerId: peer?.id }));
   }
   _updateMicBtnState();
   console.log('[Room] Modus gesetzt:', mode, '— Gäste:', guestConns.size);
+}
+
+function _renderOwnAvatar() {
+  const el = document.getElementById('myOwnAvatar');
+  if (!el || !peer?.id) return;
+  const d = _peerAvatarData(peer.id);
+  el.textContent = d.avatar;
+  el.style.background = d.bg;
+  el.style.border = 'none';
 }
 
 function _updateLiveQrBar() {
@@ -1589,13 +1693,131 @@ function _updateGuestCountDisplay() {
   if (el) el.textContent = txt;
   const el2 = document.getElementById('liveGuestCount');
   if (el2) el2.textContent = n > 0 ? `${n} Gast${n > 1 ? 'e' : ''} verbunden` : '';
+  _updateGuestAvatarRow();
+}
+
+function _updateGuestAvatarRow() {
+  const row = document.getElementById('guestAvatarRow');
+  if (!row) return;
+  row.innerHTML = '';
+  if (guestConns.size === 0) { row.style.display = 'none'; return; }
+  guestConns.forEach((conn, peerId) => {
+    const d = _peerAvatarData(peerId);
+    const div = document.createElement('div');
+    div.dataset.peer = peerId;
+    div.title = peerId;
+    div.style.cssText = `width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;background:${d.bg};`;
+    div.textContent = d.avatar;
+    row.appendChild(div);
+  });
+  row.style.display = 'flex';
+}
+
+function _showActiveSpeaker(peerId) {
+  const el = document.getElementById('activeSpeakerDisplay');
+  if (!el) return;
+  const d = _peerAvatarData(peerId);
+  el.style.cssText = `display:flex;width:52px;height:52px;border-radius:50%;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0;background:${d.bg};`;
+  el.textContent = d.avatar;
+  el.classList.add('avatar-speaking');
+}
+
+function _clearActiveSpeaker() {
+  const el = document.getElementById('activeSpeakerDisplay');
+  if (!el) return;
+  el.style.display = 'none';
+  el.textContent = '';
+  el.classList.remove('avatar-speaking');
+}
+
+function _setGuestAvatarSpeaking(peerId, active) {
+  const row = document.getElementById('guestAvatarRow');
+  if (!row) return;
+  const div = row.querySelector(`[data-peer="${peerId}"]`);
+  if (!div) return;
+  if (active) {
+    div.classList.add('avatar-speaking');
+  } else {
+    div.classList.remove('avatar-speaking');
+    clearTimeout(_guestSpeakingTimers.get(peerId));
+    _guestSpeakingTimers.delete(peerId);
+  }
+}
+
+const _guestSpeakingTimers = new Map();
+function _highlightGuestAvatar(peerId) {
+  const row = document.getElementById('guestAvatarRow');
+  if (!row) return;
+  const div = row.querySelector(`[data-peer="${peerId}"]`);
+  if (!div) return;
+  div.classList.add('avatar-speaking');
+  clearTimeout(_guestSpeakingTimers.get(peerId));
+  _guestSpeakingTimers.set(peerId, setTimeout(() => {
+    div.classList.remove('avatar-speaking');
+    _guestSpeakingTimers.delete(peerId);
+  }, 1500));
+}
+
+// ── Chunked send: teilt grosse Nachrichten auf (WebRTC DataChannel Limit) ──
+const CHUNK_SIZE = 8000; // Zeichen pro Chunk (sicher unter 16 KB Limit)
+const _chunkBuffers = new Map(); // peerId → { chunks, total }
+const _guestLastPing = new Map(); // peerId → timestamp des letzten Pings
+
+// Watchdog: prüft alle 7s ob Gäste noch leben (Fallback für Tab-Close)
+setInterval(() => {
+  if (state.isGuest || guestConns.size === 0) return;
+  const now = Date.now();
+  let changed = false;
+  _guestLastPing.forEach((ts, peerId) => {
+    if (now - ts > 12000) { // 12s kein Ping → Gast weg
+      console.log('[Watchdog] Gast', peerId, 'nicht mehr erreichbar');
+      const conn = guestConns.get(peerId);
+      if (conn) { try { conn.close(); } catch(e) {} }
+      guestConns.delete(peerId);
+      _guestLastPing.delete(peerId);
+      changed = true;
+    }
+  });
+  if (changed) {
+    _updateGuestCountDisplay();
+    if (guestConns.size === 0) setStatus('connecting', 'Warte auf Verbindung...');
+  }
+}, 7000);
+
+function safeSend(conn, data) {
+  const json = typeof data === 'string' ? data : JSON.stringify(data);
+  if (json.length <= CHUNK_SIZE) {
+    conn.send(json);
+    return;
+  }
+  const id = Math.random().toString(36).slice(2, 10);
+  const total = Math.ceil(json.length / CHUNK_SIZE);
+  for (let i = 0; i < total; i++) {
+    const chunk = json.slice(i * CHUNK_SIZE, (i + 1) * CHUNK_SIZE);
+    conn.send(JSON.stringify({ __chunk: true, id, i, total, data: chunk }));
+  }
+}
+
+function reassembleChunk(raw) {
+  // Gibt die vollständige Nachricht zurück wenn komplett, sonst null
+  let msg;
+  try { msg = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch { return null; }
+  if (!msg.__chunk) return msg;
+  const { id, i, total, data } = msg;
+  if (!_chunkBuffers.has(id)) _chunkBuffers.set(id, { chunks: new Array(total), received: 0 });
+  const buf = _chunkBuffers.get(id);
+  if (!buf.chunks[i]) { buf.chunks[i] = data; buf.received++; }
+  if (buf.received < total) return null;
+  const full = buf.chunks.join('');
+  _chunkBuffers.delete(id);
+  try { return JSON.parse(full); } catch { return null; }
 }
 
 function broadcastToGuests(data) {
   const json = typeof data === 'string' ? data : JSON.stringify(data);
   guestConns.forEach((conn, id) => {
     if (conn.open) {
-      conn.send(json);
+      safeSend(conn, json);
     } else {
       guestConns.delete(id);
     }
@@ -1606,7 +1828,7 @@ function broadcastToGuests(data) {
 function broadcastToGuestsExcept(data, excludeId) {
   const json = typeof data === 'string' ? data : JSON.stringify(data);
   guestConns.forEach((conn, id) => {
-    if (id !== excludeId && conn.open) conn.send(json);
+    if (id !== excludeId && conn.open) safeSend(conn, json);
   });
 }
 
@@ -1633,12 +1855,16 @@ function createRoom() {
     document.getElementById('hostOffer').classList.remove('hidden');
     updateQrCode();
     _updateLiveQrBar();
+    _renderOwnAvatar();
+    // Sofort ins Hauptinterface wechseln ohne auf Gast zu warten
+    launchInterface();
   });
 
   peer.on('connection', conn => {
     console.log('[PeerJS Host] Guest connected:', conn.peer);
     peerConn = conn; // letzter Gast (für Gast-seitigen peerConn-Zugriff)
     guestConns.set(conn.peer, conn);
+    _guestLastPing.set(conn.peer, Date.now()); // Heartbeat-Tracking starten
 
     // Broadcast-Channel: sendet an alle Gäste
     state.dataChannel = {
@@ -1650,10 +1876,11 @@ function createRoom() {
 
     conn.on('close', () => {
       guestConns.delete(conn.peer);
+      _guestLastPing.delete(conn.peer);
       console.log('[PeerJS Host] Guest disconnected:', conn.peer, '— remaining:', guestConns.size);
       _updateGuestCountDisplay();
       if (guestConns.size === 0) {
-        document.getElementById('hostWaiting').textContent = '⏳ Warte auf Gast...';
+        setStatus('connecting', 'Warte auf Verbindung...');
       }
     });
   });
@@ -1691,6 +1918,7 @@ function joinRoom() {
 
   peer.on('open', myId => {
     clearTimeout(connectTimeout);
+    _renderOwnAvatar();
     console.log('[PeerJS Guest] My ID:', myId, '— connecting to:', code);
     setStatus('connecting', 'Verbinde mit Host...');
     state.roomId = code;
@@ -1738,8 +1966,13 @@ function setupPeerConnection(conn) {
     if (state.isGuest) {
       state.dataChannel = {
         readyState: 'open',
-        send: data => conn.send(data)
+        send: data => safeSend(conn, data)
       };
+      // Heartbeat: alle 5s ein Ping senden damit Host merkt wenn Tab geschlossen wird
+      const _heartbeat = setInterval(() => {
+        if (!peerConn || !peerConn.open) { clearInterval(_heartbeat); return; }
+        try { peerConn.send(JSON.stringify({ type: 'ping' })); } catch(e) { clearInterval(_heartbeat); }
+      }, 5000);
     }
     setStatus('connected', 'Verbunden ✓');
     launchInterface();
@@ -1750,22 +1983,29 @@ function setupPeerConnection(conn) {
     unlockAudio();
     // Raum-Modus und Mic-Status an neuen Gast senden
     if (!state.isGuest) {
-      conn.send(JSON.stringify({ type: 'room_mode', mode: state.roomMode }));
+      safeSend(conn, JSON.stringify({ type: 'room_mode', mode: state.roomMode }));
+      safeSend(conn, JSON.stringify({
+        type: 'host_settings',
+        debounceMs: state.debounceMs,
+        interimMode: state.interimMode,
+        interimWordCount: state.interimWordCount,
+      }));
       if (state.isMicActive) {
-        conn.send(JSON.stringify({ type: 'mic_start', isHost: true }));
+        safeSend(conn, JSON.stringify({ type: 'mic_start', isHost: true }));
       }
     }
   });
 
   conn.on('data', async data => {
-    const msg = typeof data === 'string' ? JSON.parse(data) : data;
+    const msg = reassembleChunk(data);
+    if (!msg) return; // Chunk noch unvollständig — warten
 
     // HOST: Stimmen-Liste für Gast bereitstellen
     if (msg.type === 'voices_request') {
       const lang = msg.lang;
       // Stimmen direkt aus der Google TTS API holen und rohe Liste schicken
       if (!state.apiKey) {
-        conn.send(JSON.stringify({ type: 'voices_response', lang, voices: [] }));
+        safeSend(conn, JSON.stringify({ type: 'voices_response', lang, voices: [] }));
       } else {
         try {
           const voiceInfo = googleVoices[lang];
@@ -1786,9 +2026,9 @@ function setupPeerConnection(conn) {
             .filter(v => v.name && qualityFilter(v))
             .sort((a,b) => priority(a.name) - priority(b.name) || a.name.localeCompare(b.name))
             .map(v => ({ name: v.name, ssmlGender: v.ssmlGender, languageCodes: v.languageCodes }));
-          conn.send(JSON.stringify({ type: 'voices_response', lang, voices }));
+          safeSend(conn, JSON.stringify({ type: 'voices_response', lang, voices }));
         } catch(e) {
-          conn.send(JSON.stringify({ type: 'voices_response', lang, voices: [] }));
+          safeSend(conn, JSON.stringify({ type: 'voices_response', lang, voices: [] }));
         }
       }
     }
@@ -1800,7 +2040,7 @@ function setupPeerConnection(conn) {
 
       if (!voiceName || voiceName === 'browser' || !state.apiKey) {
         // Browser TTS kann nicht übertragen werden — leere Antwort
-        conn.send(JSON.stringify({ type: 'tts_response', id, audioContent: null, lang }));
+        safeSend(conn, JSON.stringify({ type: 'tts_response', id, audioContent: null, lang }));
       } else {
         try {
           const langCode = voiceName.split('-').slice(0, 2).join('-');
@@ -1812,12 +2052,12 @@ function setupPeerConnection(conn) {
                 audioConfig: { audioEncoding: 'MP3', speakingRate: 0.95, pitch: 0.0 } }) }
           );
           const data = await resp.json();
-          conn.send(JSON.stringify({
+          safeSend(conn, JSON.stringify({
             type: 'tts_response', id,
             audioContent: data.audioContent || null, lang,
           }));
         } catch(e) {
-          conn.send(JSON.stringify({ type: 'tts_response', id, audioContent: null, lang }));
+          safeSend(conn, JSON.stringify({ type: 'tts_response', id, audioContent: null, lang }));
         }
       }
     }
@@ -1848,7 +2088,7 @@ function setupPeerConnection(conn) {
         }
         const callsSnapshot = groqCallLog.slice(callsBefore);
         groqCallLog = groqCallLog.slice(0, callsBefore);
-        conn.send(JSON.stringify({
+        safeSend(conn, JSON.stringify({
           type: 'translate_response',
           id,
           text,
@@ -1861,7 +2101,7 @@ function setupPeerConnection(conn) {
           groqCalls: callsSnapshot,
         }));
       } catch(e) {
-        conn.send(JSON.stringify({
+        safeSend(conn, JSON.stringify({
           type: 'translate_response', id, text, sourceLang, targetLang,
           translation: text, isFinal,
         }));
@@ -1879,38 +2119,18 @@ function setupPeerConnection(conn) {
             broadcastToGuestsExcept(JSON.stringify({
               type: 'speech', text: msg.text, lang: msg.lang,
               isFinal: msg.isFinal, sentAt: msg.sentAt, speechStart: msg.speechStart,
+              speakerId: msg.speakerId || conn.peer,
             }), conn.peer);
           }
+          _currentIncomingPeer = conn.peer;
+          _highlightGuestAvatar(conn.peer);
           await handleIncomingText(msg.text, msg.lang || state.targetLang, msg.isFinal !== false);
         }
-        // Original-Text auf Host anzeigen
-        const origBox = document.getElementById('incomingOriginal');
-        if (origBox && msg.text) {
-          if (msg.isFinal !== false) {
-            const pending = origBox.querySelector('.pending-interim');
-            if (pending) pending.remove();
-            const entry = document.createElement('div');
-            entry.style.cssText = 'border-bottom:1px solid var(--border);padding-bottom:0.4rem;margin-bottom:0.4rem;';
-            entry.textContent = msg.text;
-            origBox.appendChild(entry);
-            origBox.scrollTop = origBox.scrollHeight;
-            origBox.querySelector('.placeholder')?.remove();
-          } else {
-            let pending = origBox.querySelector('.pending-interim');
-            if (!pending) {
-              pending = document.createElement('div');
-              pending.className = 'pending-interim';
-              pending.style.cssText = 'color:var(--text-dim);font-style:italic;';
-              origBox.appendChild(pending);
-              origBox.querySelector('.placeholder')?.remove();
-            }
-            pending.textContent = msg.text;
-          }
-        }
-        return; // Host: nicht weiter verarbeiten
+        return; // Host: nicht weiter verarbeiten (incomingOriginal wird in handleIncomingText befüllt)
       }
 
-      // GAST empfängt Speech vom Host → Übersetzungsanfrage zurückschicken
+      // GAST empfängt Speech vom Host (oder weitergeleiteten Gast) → Übersetzungsanfrage zurückschicken
+      if (msg.speakerId) _currentIncomingPeer = msg.speakerId;
       if (msg.text && msg.text.trim()) {
         // Latenzstart: Zeitstempel vom Host (wann er gesendet hat)
         // sentAt ist performance.now() auf dem Host — nicht direkt vergleichbar,
@@ -1939,9 +2159,26 @@ function setupPeerConnection(conn) {
           groqKey: state.groqApiKey || '',
         }, conn);
       }
-      // Original-Fragment für Log merken
+      // Original-Fragment für Log merken (nur Delta)
       if (msg.text && msg.text.trim()) {
-        _guestOrigFragments.push({ text: msg.text, reason: msg.isFinal !== false ? 'debounce' : 'words' });
+        const isFinalMsg = msg.isFinal !== false;
+        if (isFinalMsg) {
+          // Finales Fragment: Rest nach letztem Interim
+          const remainder = _guestLastOrigText
+            ? msg.text.slice(_guestLastOrigText.length).trim()
+            : msg.text.trim();
+          if (remainder) _guestOrigFragments.push({ text: remainder, reason: 'debounce' });
+          else if (_guestOrigFragments.length === 0) _guestOrigFragments.push({ text: msg.text.trim(), reason: 'debounce' });
+          else _guestOrigFragments[_guestOrigFragments.length - 1].reason = 'debounce';
+          _guestLastOrigText = '';
+        } else {
+          // Interim-Fragment: Delta seit letztem gesendeten Text
+          const delta = _guestLastOrigText
+            ? msg.text.slice(_guestLastOrigText.length).trimStart()
+            : msg.text.trim();
+          _guestLastOrigText = msg.text;
+          if (delta) _guestOrigFragments.push({ text: delta, reason: 'words' });
+        }
       }
 
       // Original-Text in Box anzeigen (ohne zu übersetzen)
@@ -1980,25 +2217,69 @@ function setupPeerConnection(conn) {
       console.log('[Room] Modus:', msg.mode);
     }
 
+    if (msg.type === 'ping') {
+      _guestLastPing.set(conn.peer, Date.now());
+      return;
+    }
+
+    if (msg.type === 'guest_leave') {
+      // Explizite Abmeldung — sofort aus guestConns entfernen und Status aktualisieren
+      guestConns.delete(conn.peer);
+      _updateGuestCountDisplay();
+      if (guestConns.size === 0) {
+        setStatus('connecting', 'Warte auf Verbindung...');
+      }
+    }
+
+    if (msg.type === 'host_settings' && state.isGuest) {
+      state.debounceMs     = msg.debounceMs;
+      state.interimMode    = msg.interimMode;
+      state.interimWordCount = msg.interimWordCount;
+      // UI-Felder aktualisieren falls sichtbar
+      const dbEl = document.getElementById('debounceMs');
+      if (dbEl) dbEl.value = msg.debounceMs;
+      const imEl = document.getElementById('interimMode');
+      if (imEl) { imEl.checked = msg.interimMode; updateInterimUI(); }
+      const iwEl = document.getElementById('interimWordCount');
+      if (iwEl) iwEl.value = msg.interimWordCount;
+      console.log('[Settings] Vom Host übernommen:', msg);
+    }
+
     if (msg.type === 'mic_start') {
-      // Gast: anderes Mikrofon aktiv → Button deaktivieren
       if (state.isGuest) {
+        // Gast: anderes Mikrofon aktiv → Button deaktivieren, eigenes Mic stoppen
         _remoteMicActive = true;
         if (state.isMicActive) stopMic();
         _updateMicBtnState();
-      }
-      // Host: Gast-Mikrofon übersteuern falls Host selbst spricht
-      if (!state.isGuest && msg.isHost === false && state.isMicActive) {
-        // Host spricht bereits → Gast stoppen (Gast hat irrtümlich gestartet)
-        state.dataChannel?.send && state.dataChannel.send(JSON.stringify({ type: 'mic_start', isHost: true }));
+        if (msg.speakerId) _showActiveSpeaker(msg.speakerId);
+      } else if (msg.isHost === false) {
+        // Host empfängt Mic-Anfrage von Gast
+        const micBusy = state.isMicActive || (_activeSpeakingGuest && _activeSpeakingGuest !== conn.peer);
+        if (micBusy) {
+          // Belegt → Gast zurückweisen (Mic sofort wieder sperren)
+          safeSend(conn, JSON.stringify({ type: 'mic_start', isHost: true }));
+        } else {
+          // Gewähren → Mic diesem Gast zuteilen, alle anderen Gäste sperren
+          _activeSpeakingGuest = conn.peer;
+          broadcastToGuestsExcept(JSON.stringify({ type: 'mic_start', isHost: false, speakerId: conn.peer }), conn.peer);
+          _setGuestAvatarSpeaking(conn.peer, true);
+        }
       }
     }
 
     if (msg.type === 'mic_stop') {
-      // Gast: anderes Mikrofon freigegeben → Button wieder aktivieren
       if (state.isGuest) {
+        // Gast: Mic freigegeben → Button wieder aktivieren
         _remoteMicActive = false;
         _updateMicBtnState();
+        _clearActiveSpeaker();
+      } else {
+        // Host: Mic des Gastes freigeben, alle anderen Gäste entsperren
+        if (_activeSpeakingGuest === conn.peer) {
+          _activeSpeakingGuest = null;
+          broadcastToGuestsExcept(JSON.stringify({ type: 'mic_stop' }), conn.peer);
+        }
+        _setGuestAvatarSpeaking(conn.peer, false);
       }
     }
 
@@ -2040,7 +2321,7 @@ function setupPeerConnection(conn) {
     }
   });
 
-  conn.on('close', () => { console.log('[PeerJS] Connection closed'); setStatus('error', 'Verbindung getrennt'); });
+  conn.on('close', () => { console.log('[PeerJS] Connection closed'); if (state.isGuest) { setStatus('error', 'Verbindung getrennt'); } });
   conn.on('error', e => { console.log('[PeerJS] Connection error:', e); setStatus('error', 'Fehler: ' + e); });
   
   // Monitor ICE state
@@ -2055,7 +2336,7 @@ function setupPeerConnection(conn) {
 
 function collectSettings() {
   state.apiKey = document.getElementById('apiKeyInput').value.trim();
-  state.myLang = document.getElementById('myLangLive')?.value || document.getElementById('myLangSelect').value || 'de';
+  state.myLang = document.getElementById('myLangLive')?.value || document.getElementById('myLangSelect').value || 'auto';
   state.targetLang = document.getElementById('targetLangLive')?.value || document.getElementById('targetLangSelect').value || 'en';
   state.ttsQuality = document.getElementById('ttsQuality').value;
   state.debounceMs = parseInt(document.getElementById('debounceMs')?.value) || 1000;
@@ -2072,6 +2353,7 @@ function collectSettings() {
 function launchInterface() {
   document.getElementById('setupSection').style.display = 'none';
   document.getElementById('mainInterface').classList.add('visible');
+  requestAnimationFrame(() => requestAnimationFrame(updateLangGridMaxHeight));
   // Modus-Selector im Hauptinterface: nur für Host anzeigen
   const rmLive = document.getElementById('roomModeSelectLive');
   if (rmLive) {
@@ -2079,12 +2361,22 @@ function launchInterface() {
     rmLive.value = state.roomMode;
   }
   // QR/Link-Leiste: nur für Host
-  const qrBar = document.getElementById('liveQrBar');
-  if (qrBar) qrBar.style.display = state.isGuest ? 'none' : 'flex';
+  updateLocalQrVisibility();
+  updateExternQrVisibility();
   if (!state.isGuest) _updateLiveQrBar();
+  const hangUpBtn = document.getElementById('hangUpBtn');
+  if (hangUpBtn) hangUpBtn.innerHTML = state.isGuest ? '✕ Verlassen' : '✕ Beenden';
+  ['settingDebounce', 'settingInterimMode', 'settingWordCount', 'settingLocalQr', 'settingExternQr'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = state.isGuest ? 'none' : '';
+  });
   document.getElementById('myLangLive').value = state.myLang;
   document.getElementById('targetLangLive').value = state.targetLang;
   document.getElementById('roomIdDisplay').textContent = state.roomId;
+  updateInterimUI();
+  setLogLevel(state.logLevel || 'chat');
+  const logSel = document.getElementById('logLevelSelect');
+  if (logSel) logSel.value = state.logLevel || 'chat';
   if (!state.dataChannel) setStatus('connecting', 'Warte auf Verbindung...');
   // Load voices for current target language
   if (state.isGuest && peerConn) {
@@ -2098,11 +2390,8 @@ function launchInterface() {
   if (engQ) { engQ.value = state.translateEngine; }
   const qEval = document.getElementById('qualityEval');
   if (qEval) qEval.checked = state.qualityEval;
-  // Show quality panel immediately if evaluation is configured
-  const qp = document.getElementById('qualityPanel');
-  if (qp && document.getElementById('qualityEval')?.checked && state.groqApiKey) {
-    qp.style.display = 'block';
-  }
+  // Show quality/latency panels based on checkbox state
+  updateQualityPanel();
 }
 
 function updateMyLang() {
@@ -2111,12 +2400,63 @@ function updateMyLang() {
 }
 
 function updateQualityPanel() {
-  const active = document.getElementById('qualityEval')?.checked && state.groqApiKey;
+  const checked = document.getElementById('qualityEval')?.checked;
+  const active = checked && state.groqApiKey;
   const qp = document.getElementById('qualityPanel');
   if (qp) qp.style.display = active ? 'block' : 'none';
+  const lp = document.getElementById('latencyPanel');
+  if (lp) lp.style.display = checked ? 'block' : 'none';
+  const mc = document.querySelector('.metrics-col');
+  if (mc) mc.style.display = checked ? 'flex' : 'none';
+}
+
+function updateTypewriterVisibility() {
+  const show = document.getElementById('showTypewriter')?.checked;
+  const el = document.getElementById('typewriterPanel');
+  if (el) el.style.display = show ? 'flex' : 'none';
+}
+
+function updateLocalQrVisibility() {
+  const show = !state.isGuest && document.getElementById('showLocalQr')?.checked;
+  const el = document.getElementById('liveQrBar');
+  if (el) el.style.display = show ? 'flex' : 'none';
+}
+
+function updateExternQrVisibility() {
+  const show = !state.isGuest && document.getElementById('showExternQr')?.checked;
+  const el = document.getElementById('liveQrBarExtern');
+  if (el) el.style.display = show ? 'flex' : 'none';
+}
+
+function updateLangGridMaxHeight() {
+  const banner = document.querySelector('#mainInterface .connection-banner');
+  const grid = document.querySelector('#mainInterface .lang-grid');
+  if (!banner || !grid) return;
+  const maxH = window.innerHeight * 0.5 - banner.getBoundingClientRect().bottom - 8;
+  grid.style.maxHeight = Math.max(80, maxH) + 'px';
+}
+window.addEventListener('resize', updateLangGridMaxHeight);
+
+function toggleAdvancedSettings() {
+  const panel = document.getElementById('advancedSettings');
+  const btn = document.getElementById('settingsToggleBtn');
+  if (!panel) return;
+  const open = panel.style.display === 'none' || panel.style.display === '';
+  panel.style.display = open ? 'flex' : 'none';
+  if (btn) btn.style.color = open ? 'var(--accent)' : 'var(--text-dim)';
+  requestAnimationFrame(updateLangGridMaxHeight);
 }
 
 function updateInterimUI() {
+  const active = document.getElementById('interimMode')?.checked;
+  const wordCountEl = document.getElementById('interimWordCount');
+  const wordCountLabel = document.getElementById('settingWordCount');
+  if (wordCountEl) {
+    wordCountEl.disabled = !active;
+    wordCountEl.style.opacity = active ? '' : '0.4';
+    wordCountEl.style.cursor = active ? '' : 'not-allowed';
+  }
+  if (wordCountLabel) wordCountLabel.style.opacity = active ? '' : '0.5';
 }
 
 function requestVoicesFromHost(lang) {
@@ -2191,9 +2531,16 @@ function startMic() {
     btn.classList.replace('idle', 'listening');
     document.getElementById('micBtn').title = 'Aktiv — drücken zum Stoppen';
     document.getElementById('speakingIndicator').classList.add('visible');
+    document.getElementById('myOwnAvatar')?.classList.add('avatar-speaking');
+    if (state.isGuest) _clearActiveSpeaker();
+    // Host übersteuert: aktiven Gast-Speaker freigeben
+    if (!state.isGuest && _activeSpeakingGuest) {
+      _setGuestAvatarSpeaking(_activeSpeakingGuest, false);
+      _activeSpeakingGuest = null;
+    }
     // Anderen informieren dass dieses Mikrofon aktiv ist
     if (state.dataChannel?.readyState === 'open') {
-      state.dataChannel.send(JSON.stringify({ type: 'mic_start', isHost: !state.isGuest }));
+      state.dataChannel.send(JSON.stringify({ type: 'mic_start', isHost: !state.isGuest, speakerId: peer?.id }));
     }
   };
 
@@ -2204,6 +2551,7 @@ function startMic() {
   let latestInterimText = '';
   let groqSentWordCount = 0;
   let googleSentWordCount = 0; // analog zu groqSentWordCount für Google-Pfad
+  let sttLastSentText = ''; // letzter gesendeter Interimtext (für Delta-Log)
   let speechStart = 0;
   let debounceCompleted = false;
 
@@ -2239,23 +2587,22 @@ function startMic() {
         latestInterimText = '';
         googleSentWordCount = 0;
         groqSentWordCount = 0;
+        sttLastSentText = '';
 
         // Latenz: STT-Start → Senden
         state.latencyStart = speechStart;
         state.tSendTime = performance.now();
         speechStart = 0;
 
-        // Fehlende Wörter seit letztem Interim-Fragment nachtragen
-        const finalAllWords = newFinalText.trim().split(' ').filter(w => w);
-        const lastFrag = state.interimFragments[state.interimFragments.length - 1];
-        const lastFragWords = lastFrag ? lastFrag.text.split(' ').filter(w=>w).length : 0;
-        if (finalAllWords.length > lastFragWords) {
-          const missingPart = finalAllWords.slice(lastFragWords).join(' ');
-          if (missingPart.trim()) {
-            state.interimFragments.push({ text: missingPart.trim(), reason: 'debounce' });
-            state.sttFragments.push({ text: newFinalText.trim(), reason: 'debounce' });
-          }
+        // Fehlende Wörter seit letztem Interim-Fragment nachtragen (Delta)
+        const missingPart = sttLastSentText
+          ? newFinalText.trim().slice(sttLastSentText.length).trim()
+          : newFinalText.trim();
+        if (missingPart) {
+          state.interimFragments.push({ text: missingPart, reason: 'debounce' });
+          state.sttFragments.push({ text: newFinalText.trim(), reason: 'debounce' });
         }
+        sttLastSentText = '';
 
         for (let i = nextResultIndex; i < event.results.length; i++) {
           if (event.results[i].isFinal) nextResultIndex = i + 1;
@@ -2266,8 +2613,8 @@ function startMic() {
           const hostFinalNow = performance.now();
           state.dataChannel.send(JSON.stringify({
             type: 'speech', text: newFinalText.trim(), lang: state.myLang, isFinal: true,
-            sentAt: hostFinalNow,
-            speechStart: state.latencyStart || hostFinalNow,
+            sentAt: hostFinalNow, speechStart: state.latencyStart || hostFinalNow,
+            speakerId: peer?.id,
           }));
         }
         document.getElementById('myTranscript').textContent = '';
@@ -2281,7 +2628,7 @@ function startMic() {
         // Log-Eintrag für Host (Ich spreche)
         addLogEntry('me', newFinalText.trim(), '', state.myLang, state.targetLang,
           [...state.interimFragments], null, null, [...state.sttFragments],
-          null, null);
+          null, null, peer?.id);
         state.interimFragments = [];
         state.sttFragments = [];
       }, state.debounceMs);
@@ -2297,16 +2644,18 @@ function startMic() {
         const fragment = endsWithSpace ? currWords.join(' ') : currWords.slice(0, -1).join(' ');
         const newSentCount = endsWithSpace ? currWords.length : currWords.length - 1;
         if (fragment.trim() && newSentCount > googleSentWordCount) {
+          const sttDelta = fragment.slice(sttLastSentText.length).trimStart();
           googleSentWordCount = newSentCount;
+          sttLastSentText = fragment;
           if (state.dataChannel?.readyState === 'open') {
             const hostNow = performance.now();
             state.dataChannel.send(JSON.stringify({
               type: 'speech', text: fragment, lang: state.myLang, isFinal: false,
-              sentAt: hostNow,
-              speechStart: speechStart || hostNow, // wann Host zu sprechen begann
+              sentAt: hostNow, speechStart: speechStart || hostNow,
+              speakerId: peer?.id,
             }));
           }
-          state.interimFragments.push({ text: fragment, reason: 'words' });
+          state.interimFragments.push({ text: sttDelta || fragment, reason: 'words' });
           state.sttFragments.push({ text: fullInterim, reason: 'interim' });
         }
       }
@@ -2386,6 +2735,7 @@ function stopMic() {
   btn.classList.replace('listening', 'idle');
   document.getElementById('micBtn').title = 'Zum Sprechen drücken';
   document.getElementById('speakingIndicator').classList.remove('visible');
+  document.getElementById('myOwnAvatar')?.classList.remove('avatar-speaking');
   // Anderen informieren dass Mikrofon gestoppt
   if (state.dataChannel?.readyState === 'open') {
     state.dataChannel.send(JSON.stringify({ type: 'mic_stop' }));
@@ -2399,6 +2749,7 @@ let _textInputDebounce = null;
 let _textInputInterimDebounce = null;
 let _textInputSentWordCount = 0;
 let _textInputInterimAccum = '';
+let _textInputLastSentText = ''; // letzter gesendeter Interimtext (für Delta-Berechnung)
 
 function onTextInput(ta) {
   // Textarea auto-resize
@@ -2426,6 +2777,7 @@ function onTextInput(ta) {
   if (!text.trim()) {
     _textInputSentWordCount = 0;
     _textInputInterimAccum = '';
+    _textInputLastSentText = '';
     clearTimeout(_textInputDebounce);
     clearTimeout(_textInputInterimDebounce);
     return;
@@ -2440,13 +2792,16 @@ function onTextInput(ta) {
 
     if (fragment.trim() && fragmentWordCount > _textInputSentWordCount
         && fragmentWordCount >= _textInputSentWordCount + state.interimWordCount) {
+      // Delta: nur die neu hinzugekommenen Wörter fürs Log
+      const deltaText = fragment.slice(_textInputLastSentText.length).trimStart();
       _textInputSentWordCount = fragmentWordCount;
+      _textInputLastSentText = fragment;
       if (state.dataChannel?.readyState === 'open') {
         state.dataChannel.send(JSON.stringify({
-          type: 'speech', text: fragment, lang: state.myLang, isFinal: false, sentAt: performance.now()
+          type: 'speech', text: fragment, lang: state.myLang, isFinal: false, sentAt: performance.now(), speakerId: peer?.id,
         }));
       }
-      addTextInputLogEntry(fragment, 'interim');
+      addTextInputLogEntry(deltaText || fragment, 'interim');
     }
   }
 
@@ -2477,12 +2832,13 @@ function sendTextFinal(text) {
   // Vollständigen Text als final senden
   if (state.dataChannel?.readyState === 'open') {
     state.dataChannel.send(JSON.stringify({
-      type: 'speech', text, lang: state.myLang, isFinal: true
+      type: 'speech', text, lang: state.myLang, isFinal: true, speakerId: peer?.id,
     }));
   }
 
   _textInputSentWordCount = 0;
   _textInputInterimAccum = '';
+  _textInputLastSentText = '';
   addTextInputLogEntry(text, 'final');
 }
 
@@ -2491,50 +2847,124 @@ function sendTextInput() {
   if (ta && ta.value.trim()) sendTextFinal(ta.value.trim());
 }
 
+function sendTypewriterText() {
+  const src = document.getElementById('typewriterSource');
+  if (!src || !src.value.trim()) return;
+  // Laufende Animation stoppen falls aktiv
+  if (_typewriterRunning || _typewriterPaused) stopTypewriterFull();
+  sendTextFinal(src.value.trim());
+}
+
 // ── Typewriter ──────────────────────────────────────────────
 let _typewriterTimer = null;
 let _typewriterPos = 0;
 let _typewriterRunning = false;
+let _typewriterPaused = false;
+let _typewriterText = '';
+let _typewriterSentWordCount = 0;
+let _typewriterLastSentText = ''; // letzter gesendeter Interimtext (für Delta)
+
+function _typewriterSetButtons(state) {
+  // state: 'idle' | 'running' | 'paused'
+  const play = document.getElementById('typewriterPlayBtn');
+  const stop = document.getElementById('typewriterStopBtn');
+  if (state === 'running') {
+    if (play) { play.textContent = '⏸'; play.title = 'Pause'; }
+    if (stop) { stop.disabled = false; stop.style.cursor = 'pointer'; stop.style.color = 'var(--text)'; stop.style.background = 'var(--surface2)'; }
+  } else if (state === 'paused') {
+    if (play) { play.textContent = '▶'; play.title = 'Fortsetzen'; }
+    if (stop) { stop.disabled = false; stop.style.cursor = 'pointer'; stop.style.color = 'var(--text)'; stop.style.background = 'var(--surface2)'; }
+  } else { // idle
+    if (play) { play.textContent = '▶'; play.title = 'Abspielen'; }
+    if (stop) { stop.disabled = true; stop.style.cursor = 'not-allowed'; stop.style.color = 'var(--text-dimmer)'; stop.style.background = 'var(--surface2)'; }
+  }
+}
 
 function toggleTypewriter() {
   if (_typewriterRunning) {
-    stopTypewriter();
+    // Pause
+    _typewriterRunning = false;
+    _typewriterPaused = true;
+    clearTimeout(_typewriterTimer);
+    _typewriterSetButtons('paused');
+  } else if (_typewriterPaused) {
+    // Fortsetzen
+    _typewriterRunning = true;
+    _typewriterPaused = false;
+    _typewriterSetButtons('running');
+    _typewriterContinue();
   } else {
+    // Neu starten
     startTypewriter();
   }
 }
 
 function startTypewriter() {
   const src = document.getElementById('typewriterSource');
-  const ta  = document.getElementById('textInput');
-  if (!src || !ta) return;
+  if (!src) return;
   const text = src.value;
   if (!text.trim()) return;
 
+  _typewriterText = text;
   _typewriterRunning = true;
+  _typewriterPaused = false;
   _typewriterPos = 0;
-  ta.value = '';
-  ta.style.height = 'auto';
-  onTextInput(ta); // Clear-Button etc. aktualisieren
+  _typewriterSentWordCount = 0;
+  _typewriterLastSentText = '';
+  _typewriterUpdateTranscript('');
+  _typewriterSetButtons('running');
+  _typewriterContinue();
+}
 
-  const btn = document.getElementById('typewriterPlayBtn');
-  if (btn) { btn.textContent = '⏹'; btn.title = 'Stoppen'; }
+function _typewriterUpdateTranscript(text) {
+  const box = document.getElementById('myTranscript');
+  if (!box) return;
+  box.innerHTML = text
+    ? `<span>${text}</span>`
+    : '<span class="placeholder">Mikrofon drücken und sprechen...</span>';
+}
+
+function _typewriterContinue() {
+  const text = _typewriterText;
 
   function typeNext() {
     if (!_typewriterRunning || _typewriterPos >= text.length) {
-      stopTypewriter();
-      // Finales Senden auslösen wenn Text vollständig
-      if (_typewriterPos >= text.length && ta.value.trim()) {
-        sendTextFinal(ta.value.trim());
+      if (_typewriterPos >= text.length) {
+        // Vollständig abgespielt → finales Senden
+        _typewriterRunning = false;
+        _typewriterPaused = false;
+        _typewriterSetButtons('idle');
+        if (text.trim()) sendTextFinal(text.trim());
       }
       return;
     }
     const ch = text[_typewriterPos];
-    ta.value += ch;
     _typewriterPos++;
-    ta.style.height = 'auto';
-    ta.style.height = Math.min(ta.scrollHeight, 120) + 'px';
-    onTextInput(ta);
+    const currentText = text.slice(0, _typewriterPos);
+    _typewriterUpdateTranscript(currentText);
+
+    // ── Dolmetscher-Modus: Wort-Schwelle prüfen ──
+    if (state.interimMode) {
+      const words = currentText.trim().split(/\s+/).filter(w => w);
+      const endsWithSpace = currentText.endsWith(' ');
+      // Letztes Wort nur mitsenden wenn durch Leerzeichen abgeschlossen
+      const fragmentWordCount = endsWithSpace ? words.length : words.length - 1;
+      const fragment = endsWithSpace ? words.join(' ') : words.slice(0, -1).join(' ');
+
+      if (fragment.trim()
+          && fragmentWordCount > _typewriterSentWordCount
+          && fragmentWordCount >= _typewriterSentWordCount + state.interimWordCount) {
+        const twDelta = fragment.slice(_typewriterLastSentText.length).trimStart();
+        _typewriterSentWordCount = fragmentWordCount;
+        _typewriterLastSentText = fragment;
+        if (state.dataChannel?.readyState === 'open') {
+          state.dataChannel.send(JSON.stringify({
+            type: 'speech', text: fragment, lang: state.myLang, isFinal: false, sentAt: performance.now(), speakerId: peer?.id,
+          }));
+        }
+        addTextInputLogEntry(twDelta || fragment, 'interim');
+      }
+    }
 
     const charsPerSec = parseInt(document.getElementById('typewriterSpeed')?.value) || 5;
     const delay = Math.round(1000 / charsPerSec);
@@ -2543,12 +2973,26 @@ function startTypewriter() {
   typeNext();
 }
 
+function stopTypewriterFull() {
+  // Stop: Abbrechen, Position zurücksetzen, textInput leeren
+  _typewriterRunning = false;
+  _typewriterPaused = false;
+  _typewriterPos = 0;
+  _typewriterText = '';
+  _typewriterSentWordCount = 0;
+  _typewriterLastSentText = '';
+  clearTimeout(_typewriterTimer);
+  _typewriterTimer = null;
+  _typewriterUpdateTranscript('');
+  _typewriterSetButtons('idle');
+}
+
 function stopTypewriter() {
+  // Intern: nur Timer stoppen, Buttons auf idle (kein Reset der Position)
   _typewriterRunning = false;
   clearTimeout(_typewriterTimer);
   _typewriterTimer = null;
-  const btn = document.getElementById('typewriterPlayBtn');
-  if (btn) { btn.textContent = '▶'; btn.title = 'Abspielen'; }
+  _typewriterSetButtons('idle');
 }
 
 function clearTextInput() {
@@ -2558,7 +3002,7 @@ function clearTextInput() {
   _textInputInterimAccum = '';
   const btn = document.getElementById('textInputClearBtn');
   if (btn) btn.style.display = 'none';
-  stopTypewriter();
+  stopTypewriterFull();
   _textInputLogFragments = [];
   state.latencyStart = 0;
   _textInputSentWordCount = 0;
@@ -2572,10 +3016,14 @@ let _textInputLogFragments = [];
 function addTextInputLogEntry(text, type) {
   const makeSep = char =>
     `<span style="color:var(--accent3);font-weight:600;margin:0 4px;opacity:0.8;">${char}</span>`;
+  const level = state.logLevel || 'chat';
 
   if (type === 'interim') {
     // Fragment merken, noch nicht flushen
     _textInputLogFragments.push(text);
+
+    // Im Chat-Modus keine Pending-Einträge anzeigen
+    if (level === 'chat') return;
 
     // Aktuellen Stand im Log als letzten Eintrag aktualisieren (oder neu erstellen)
     const logEntries = document.getElementById('logEntries');
@@ -2604,19 +3052,24 @@ function addTextInputLogEntry(text, type) {
     const pending = logEntries?.querySelector('.text-input-pending');
     if (pending) pending.remove();
 
-    // Fragmente + finaler Text als vollständiger Eintrag
+    // Fragmente (Delta-Texte) + finaler Resttext als vollständiger Eintrag
     const frags = _textInputLogFragments.map(f => ({ text: f, reason: 'words' }));
-    // Prüfen ob finaler Text bereits im letzten Fragment enthalten ist
-    const lastFrag = frags[frags.length - 1];
-    if (!lastFrag || lastFrag.text.trim() !== text.trim()) {
+    // Finales Fragment = Resttext nach dem letzten gesendeten Interim
+    const sentSoFar = _textInputLastSentText || _typewriterLastSentText || '';
+    const remainder = sentSoFar ? text.slice(sentSoFar.length).trim() : text.trim();
+    if (remainder) {
+      frags.push({ text: remainder, reason: 'debounce' });
+    } else if (frags.length === 0) {
       frags.push({ text, reason: 'debounce' });
     } else {
       frags[frags.length - 1].reason = 'debounce';
     }
     _textInputLogFragments = [];
+    _textInputLastSentText = '';
+    _typewriterLastSentText = '';
 
     // Als normalen Log-Eintrag hinzufügen
-    addLogEntry('me', text, '', state.myLang, state.targetLang, frags, null, null, null, null, null);
+    addLogEntry('me', text, '', state.myLang, state.targetLang, frags, null, null, null, null, null, peer?.id);
   }
 }
 
@@ -2633,10 +3086,12 @@ let _guestHandleGen  = 0;         // Generation-Counter (für Interim-Verwerfen)
 let _guestPendingLog = null;      // ausstehender Log-Eintrag
 let _guestLastRequestId = null;   // ID der letzten Anfrage (stale-check)
 let _remoteMicActive = false;      // Anderes Mikrofon aktiv → Gast-Button gesperrt
+let _activeSpeakingGuest = null;   // Host: peerId des Gastes der gerade das Mic hat
 // Parallele Pipeline: Übersetzung+TTS sofort, Abspielung sequentiell per Slot
 let _guestSlotQueue = [];         // Slots in Empfangsreihenfolge: {audioPromise, isFinal, meta}
 let _guestSlotPlaying = false;    // Läuft gerade die sequentielle Abspielung?
 let _guestOrigFragments = [];     // empfangene Original-Fragmente für Log
+let _guestLastOrigText  = '';     // letzter empfangener Interim-Originaltext (für Delta-Log)
 let _guestTransFragments = [];    // übersetzte Fragmente für Log
 let _guestGroqCalls = [];         // akkumulierte Groq-Aufrufe vom Host für Log
 let _guestFinalTranslation = '';  // finale vollständige Übersetzung (für Qualitätsbewertung)
@@ -2667,7 +3122,7 @@ function _guestDispatchFragment(req, conn) {
   slot.reqId = reqId;
   state._t0guestTrans = performance.now();
 
-  conn.send(JSON.stringify({
+  safeSend(conn, JSON.stringify({
     type: 'translate_request',
     id: reqId,
     text: req.text,
@@ -2746,14 +3201,13 @@ async function handleTranslateResponse(msg) {
   if (newPart.trim() && !isFinal) {
     _guestInterimAccum = _guestInterimAccum ? _guestInterimAccum + ' ' + newPart : newPart;
     _guestTransFragments.push({ text: newPart, reason: 'words' });
-    let pendingTI = tbox.querySelector('.pending-translation');
-    if (!pendingTI) {
-      pendingTI = document.createElement('div');
-      pendingTI.className = 'pending-translation';
-      pendingTI.style.cssText = 'color:var(--text-dim);font-style:italic;';
-      tbox.appendChild(pendingTI);
-    }
-    pendingTI.textContent = _guestInterimAccum.trim();
+    // Placeholder entfernen falls vorhanden
+    tbox.querySelector('.placeholder')?.remove();
+    // Nur neues Fragment anhängen (kein pending-div der überschreibt)
+    const fragDiv = document.createElement('div');
+    fragDiv.style.cssText = 'color:var(--text-dim);font-style:italic;border-bottom:1px solid rgba(124,111,255,0.1);padding-bottom:0.3rem;margin-bottom:0.3rem;';
+    fragDiv.textContent = newPart.trim();
+    tbox.appendChild(fragDiv);
     tbox.scrollTop = tbox.scrollHeight;
   }
 
@@ -2801,9 +3255,16 @@ async function handleTranslateResponse(msg) {
     _guestInterimAccum = '';
     _remoteMicActive = false;
     _updateMicBtnState();
-    // Finales UI
-    const pendingT = tbox.querySelector('.pending-translation');
-    if (pendingT) pendingT.remove();
+    // Finales UI: finales newPart anhängen
+    tbox.querySelector('.pending-translation')?.remove();
+    if (newPart.trim()) {
+      tbox.querySelector('.placeholder')?.remove();
+      const tentry = document.createElement('div');
+      tentry.style.cssText = 'border-bottom:1px solid rgba(124,111,255,0.15);padding-bottom:0.4rem;margin-bottom:0.4rem;';
+      tentry.textContent = newPart.trim();
+      tbox.appendChild(tentry);
+      tbox.scrollTop = tbox.scrollHeight;
+    }
   }
 }
 
@@ -2860,9 +3321,10 @@ async function _guestPlayAudio(audioContent, isFinal, meta) {
       addLogEntry('other', text, totalSpoken || meta.interimAccumSnap,
         sourceLang, targetLang,
         origFragsSnap, finalTranslation || null, transFragsSnap,
-        null, groqCallsSnap, [...ttsCallLog]);
+        null, groqCallsSnap, [...ttsCallLog], _currentIncomingPeer);
       ttsCallLog = [];
       _guestOrigFragments = [];
+      _guestLastOrigText = '';
       _guestTransFragments = [];
       _guestGroqCalls = [];
       _guestFinalTranslation = '';
@@ -2884,13 +3346,15 @@ function sendSpeech(text, isFinal = true, spokenOriginalWords = 0, fullText = nu
     // Peer: immer nur Originaltext senden — Gast übersetzt und spielt TTS selbst
     const textToSend = isFinal ? (fullText || text) : text;
     if (textToSend.trim()) {
-      state.dataChannel.send(JSON.stringify({ type: 'speech', text: textToSend, lang: state.myLang, isFinal }));
+      state.dataChannel.send(JSON.stringify({ type: 'speech', text: textToSend, lang: state.myLang, isFinal, speakerId: peer?.id }));
     }
   }
 }
 
 // Lock: verhindert parallele Interim-Verarbeitung
 let interimProcessing = false;
+let _hostIncomingFragments = []; // Fragmente eingehender Gast-Texte für Log (Deltas)
+let _hostIncomingLastText = '';  // letzter empfangener Interim-Text (für Delta)
 // Promise das resolved wenn das laufende Interim-translate() fertig ist
 let interimPendingPromise = null;
 // Accumulator: Übersetzung aller bisherigen Interim-Fragmente für Anzeige
@@ -2914,6 +3378,23 @@ async function handleIncomingText(text, sourceLang, isFinal = true, spokenOrigin
   // Warten falls ein laufendes Interim-translate() noch nicht fertig ist
   if (isFinal && interimPendingPromise) {
     await interimPendingPromise;
+  }
+
+  // ── Eingehende Fragment-Deltas für Log akkumulieren ──
+  if (isFinal) {
+    const remainder = _hostIncomingLastText
+      ? text.slice(_hostIncomingLastText.length).trim()
+      : text.trim();
+    if (remainder) _hostIncomingFragments.push({ text: remainder, reason: 'debounce' });
+    else if (_hostIncomingFragments.length === 0) _hostIncomingFragments.push({ text: text.trim(), reason: 'debounce' });
+    else _hostIncomingFragments[_hostIncomingFragments.length - 1].reason = 'debounce';
+    _hostIncomingLastText = '';
+  } else {
+    const delta = _hostIncomingLastText
+      ? text.slice(_hostIncomingLastText.length).trimStart()
+      : text.trim();
+    _hostIncomingLastText = text;
+    if (delta) _hostIncomingFragments.push({ text: delta, reason: 'words' });
   }
 
   const textToTranslate = isFinal ? (fullText || text) : text;
@@ -2947,8 +3428,7 @@ async function handleIncomingText(text, sourceLang, isFinal = true, spokenOrigin
   }
 
   document.getElementById('translatingIndicator').classList.add('visible');
-  document.getElementById('incomingTranslation').innerHTML =
-    '<span style="color:var(--text-dimmer);font-style:italic;font-size:0.82rem;">Übersetze...</span>';
+  // incomingTranslation NICHT leeren — Inhalt akkumuliert sich
 
   const _t0trans = performance.now();
   const isGroqEngine = state.translateEngine === 'groq' && state.groqApiKey;
@@ -2980,32 +3460,45 @@ async function handleIncomingText(text, sourceLang, isFinal = true, spokenOrigin
       return;
     }
 
-    const resultText = result.trim();
-    if (resultText) {
-      interimTranslationAccum = alreadySpoken ? alreadySpoken + ' ' + resultText : resultText;
-      const frag = { text: resultText, reason: 'single' };
-      interimTranslationFragments.push(frag);
-      translationLogBuffer.push(frag);
-
-      const tboxI = document.getElementById('incomingTranslation');
-      let pendingTI = tboxI.querySelector('.pending-translation');
-      if (!pendingTI) {
-        pendingTI = document.createElement('div');
-        pendingTI.className = 'pending-translation';
-        pendingTI.style.cssText = 'color:var(--text-dim);font-style:italic;';
-        tboxI.appendChild(pendingTI);
-        const tphI = tboxI.querySelector('[style*="font-style:italic"]:not(.pending-translation)');
-        if (tphI) tphI.remove();
+    const resultFull = result.trim();
+    if (resultFull) {
+      // Delta berechnen: nur der neue Teil gegenüber dem bereits Gesprochenen
+      let displayText;
+      if (isGroqEngine && alreadySpoken) {
+        // Groq liefert bereits nur den neuen Teil
+        displayText = resultFull;
+      } else if (alreadySpoken) {
+        // Google: vollständige Übersetzung → Wort-Differenz
+        const spokenWords = alreadySpoken.trim().split(/\s+/).filter(w => w);
+        const allWords = resultFull.split(/\s+/).filter(w => w);
+        displayText = allWords.slice(spokenWords.length).join(' ');
+      } else {
+        displayText = resultFull;
       }
-      pendingTI.textContent = interimTranslationAccum.trim();
-      tboxI.scrollTop = tboxI.scrollHeight;
-    }
+      const resultText = displayText.trim();
+      interimTranslationAccum = alreadySpoken
+        ? alreadySpoken + (resultText ? ' ' + resultText : '')
+        : resultFull;
+      if (resultText) {
+        const frag = { text: resultText, reason: 'single' };
+        interimTranslationFragments.push(frag);
+        translationLogBuffer.push(frag);
 
+        const tboxI = document.getElementById('incomingTranslation');
+        tboxI.querySelector('.placeholder')?.remove();
+        tboxI.querySelector('[style*="font-style:italic"]:not(.pending-translation)')?.remove();
+        const fragDivI = document.createElement('div');
+        fragDivI.style.cssText = 'color:var(--text-dim);font-style:italic;border-bottom:1px solid rgba(124,111,255,0.1);padding-bottom:0.3rem;margin-bottom:0.3rem;';
+        fragDivI.textContent = resultText;
+        tboxI.appendChild(fragDivI);
+        tboxI.scrollTop = tboxI.scrollHeight;
+      }
+    }
     if (_resolveInterim) { _resolveInterim(); _resolveInterim = null; interimPendingPromise = null; }
     interimProcessing = false;
 
-    if (resultText) {
-      await speakText(resultText, state.targetLang, false);
+    if (resultFull) {
+      await speakText(resultFull, state.targetLang, false);
     }
 
   } else {
@@ -3031,18 +3524,6 @@ async function handleIncomingText(text, sourceLang, isFinal = true, spokenOrigin
 
     const translationText = translation.trim();
 
-    // Übersetzung in Box anzeigen (vollständige Übersetzung für Anzeige)
-    const tbox = document.getElementById('incomingTranslation');
-    const pendingT = tbox.querySelector('.pending-translation');
-    if (pendingT) pendingT.remove();
-    const tentry = document.createElement('div');
-    tentry.style.cssText = 'border-bottom:1px solid rgba(124,111,255,0.15);padding-bottom:0.4rem;margin-bottom:0.4rem;';
-    tentry.textContent = spokenTranslation
-      ? (translationText ? spokenTranslation + ' ' + translationText : spokenTranslation)
-      : translationText;
-    tbox.appendChild(tentry);
-    tbox.scrollTop = tbox.scrollHeight;
-
     // Rest-Übersetzung bestimmen:
     // - Groq+Continuation: translationText ist bereits nur der neue Teil
     // - Google: Wort-Differenz berechnen
@@ -3055,6 +3536,19 @@ async function handleIncomingText(text, sourceLang, isFinal = true, spokenOrigin
       restTranslation = allWords.slice(spokenWords.length).join(' ');
     } else {
       restTranslation = translationText;
+    }
+
+    // Übersetzungsfeld: finales Fragment anhängen
+    const tbox = document.getElementById('incomingTranslation');
+    tbox.querySelector('.pending-translation')?.remove();
+    const finalText = restTranslation || (!spokenTranslation ? translationText : '');
+    if (finalText) {
+      tbox.querySelector('.placeholder')?.remove();
+      const tentry = document.createElement('div');
+      tentry.style.cssText = 'border-bottom:1px solid rgba(124,111,255,0.15);padding-bottom:0.4rem;margin-bottom:0.4rem;';
+      tentry.textContent = finalText;
+      tbox.appendChild(tentry);
+      tbox.scrollTop = tbox.scrollHeight;
     }
 
     if (restTranslation) {
@@ -3070,12 +3564,13 @@ async function handleIncomingText(text, sourceLang, isFinal = true, spokenOrigin
     if (totalSpoken) {
       state.pendingLogEntry = {
         who: 'other',
+        peerId: _currentIncomingPeer,
         original: textToTranslate,
         translated: totalSpoken,
         translatedFull: null,
         fromLang: sourceLang,
         toLang: state.targetLang,
-        fragments: [...state.interimFragments],
+        fragments: [..._hostIncomingFragments],
         translatedFragments: [...translationLogBuffer],
         sttFragments: [...state.sttFragments],
         groqCalls: [...groqCallLog],
@@ -3089,6 +3584,8 @@ async function handleIncomingText(text, sourceLang, isFinal = true, spokenOrigin
       state.fullSentenceOriginal = '';
       state.interimFragments = [];
       state.sttFragments = [];
+      _hostIncomingFragments = [];
+      _hostIncomingLastText = '';
       state.conversationHistory.push({ speaker: langNames[sourceLang] || sourceLang, original: textToTranslate, translated: totalSpoken });
       if (state.conversationHistory.length > 10) state.conversationHistory.shift();
       // Log erst nach speakText flushen, damit ttsCallLog befüllt ist
@@ -3171,6 +3668,11 @@ const googleDetectToLang = {
 
 function updateDetectedLang(googleLangCode) {
   const lang = googleDetectToLang[googleLangCode] || googleLangCode;
+  state.lastDetectedLang = lang;
+  document.querySelectorAll('[data-auto-from-lang]').forEach(el => {
+    el.textContent = langNames[lang] || lang;
+    el.removeAttribute('data-auto-from-lang');
+  });
   const sel = document.getElementById('myLangLive');
   if (!sel || state.myLang !== 'auto') return;
   const option = Array.from(sel.options).find(o => o.value === lang);
@@ -3699,17 +4201,25 @@ function flushPendingLog(source) {
   if (state.pendingLogEntry) {
     const e = state.pendingLogEntry;
     state.pendingLogEntry = null;
-    addLogEntry(e.who, e.original, e.translated, e.fromLang, e.toLang, e.fragments, e.translatedFull || null, e.translatedFragments || null, e.sttFragments || null, e.groqCalls || null, e.ttsCalls || null);
+    addLogEntry(e.who, e.original, e.translated, e.fromLang, e.toLang, e.fragments, e.translatedFull || null, e.translatedFragments || null, e.sttFragments || null, e.groqCalls || null, e.ttsCalls || null, e.peerId || null);
   }
 }
 
-function addLogEntry(who, original, translated, fromLang, toLang, fragments = null, translatedFull = null, translatedFragments = null, sttFragments = null, groqCalls = null, ttsCalls = null) {
+function addLogEntry(who, original, translated, fromLang, toLang, fragments = null, translatedFull = null, translatedFragments = null, sttFragments = null, groqCalls = null, ttsCalls = null, peerId = null) {
   const log = document.getElementById('logEntries');
   const placeholder = log.querySelector('[style*="Gespräch"]');
   if (placeholder) placeholder.remove();
 
-  const time = new Date().toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const _now = new Date();
+  const time = _now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+  const timestamp = _now.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: 'numeric' })
+    + ' ' + _now.toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' });
   const engine = state.translateEngine === 'groq' ? 'Groq AI' : 'Google Translate';
+  const resolvedFromLang = fromLang === 'auto' ? (state.lastDetectedLang || null) : fromLang;
+  const fromLangText = resolvedFromLang ? (langNames[resolvedFromLang] || resolvedFromLang) : '🌐';
+  const fromLangHtml = (fromLang === 'auto' && !state.lastDetectedLang)
+    ? `<span data-auto-from-lang>🌐</span>`
+    : fromLangText;
 
   // Separator symbols by reason
   const origSepChar  = { words: '|', debounce: '{', interval: '[' };
@@ -3721,7 +4231,7 @@ function addLogEntry(who, original, translated, fromLang, toLang, fragments = nu
   // Build original display with reason-coded separators
   let originalDisplay;
   const logFragments = fragments !== null ? fragments : state.interimFragments;
-  if (state.interimMode && logFragments.length > 0) {
+  if ((state.interimMode || who === 'other') && logFragments.length > 0) {
     let parts = [];
     for (let i = 0; i < logFragments.length; i++) {
       const f = logFragments[i];
@@ -3741,7 +4251,7 @@ function addLogEntry(who, original, translated, fromLang, toLang, fragments = nu
 
   // Build translated display with reason-coded separators
   let translatedDisplay;
-  if (state.interimMode && translatedFragments && translatedFragments.length > 0) {
+  if ((state.interimMode || who === 'other') && translatedFragments && translatedFragments.length > 0) {
     let tparts = [];
     for (let i = 0; i < translatedFragments.length; i++) {
       const f = translatedFragments[i];
@@ -3759,9 +4269,11 @@ function addLogEntry(who, original, translated, fromLang, toLang, fragments = nu
     ? `<div class="log-entry-translated" style="opacity:0.7;margin-top:0.2rem;">= ${translatedFull}</div>`
     : '';
 
-  // Groq-Aufruf-Details (aufklappbar)
+  // Groq-Aufruf-Details (aufklappbar, bei Debug offen)
   let groqDebugBlock = '';
+  const _isDebug = (state.logLevel || 'chat') === 'debug';
   if (groqCalls && groqCalls.length > 0) {
+    const esc = s => String(s || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
     const callsHtml = groqCalls.map((c, i) => {
       const isGoogle = c.engine === 'google';
       const isEval = c.engine === 'groq-eval';
@@ -3770,28 +4282,45 @@ function addLogEntry(who, original, translated, fromLang, toLang, fragments = nu
         : isEval
         ? `⭐ Groq Qualitätsprüfung`
         : `🟣 Groq AI — Aufruf ${i + 1}`;
-      const body = isGoogle ? `
-        <div style="font-size:0.65rem;color:var(--text-dim);margin-bottom:0.15rem;"><b>Text:</b> ${String(c.text).replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
-        <div style="font-size:0.65rem;color:var(--accent2);"><b>Antwort:</b> ${c.response !== null ? String(c.response).replace(/</g,'&lt;').replace(/>/g,'&gt;') : '—'}</div>
-      ` : isEval ? `
-        <div style="font-size:0.65rem;color:var(--text-dim);margin-bottom:0.15rem;white-space:pre-wrap;"><b>Prompt:</b> ${String(c.userPrompt||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
-        <div style="font-size:0.65rem;color:var(--accent2);"><b>Antwort:</b> ${c.response !== null ? String(c.response).replace(/</g,'&lt;').replace(/>/g,'&gt;') : '—'}</div>
-      ` : `
-        <div style="font-size:0.65rem;color:var(--text-dim);margin-bottom:0.15rem;"><b>System:</b> ${String(c.systemPrompt||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
-        <div style="font-size:0.65rem;color:var(--text);white-space:pre-wrap;margin-bottom:0.15rem;"><b>User:</b> ${String(c.userPrompt||'').replace(/</g,'&lt;').replace(/>/g,'&gt;')}</div>
-        <div style="font-size:0.65rem;color:var(--accent2);white-space:pre-wrap;"><b>Antwort:</b> ${c.response !== null ? String(c.response).replace(/</g,'&lt;').replace(/>/g,'&gt;') : '—'}</div>
-      `;
-      return `<div style="margin-bottom:0.5rem;">
-        <div style="color:var(--accent3);font-size:0.68rem;margin-bottom:0.2rem;">${header}</div>
+
+      let body;
+      if (isGoogle) {
+        body = `
+          <div style="font-size:0.65rem;color:var(--text-dim);margin-bottom:0.15rem;"><b>Text:</b> ${esc(c.text)}</div>
+          <div style="font-size:0.65rem;color:var(--accent2);"><b>Antwort:</b> ${c.response !== null ? esc(c.response) : '—'}</div>`;
+      } else if (isEval) {
+        body = `
+          <div style="font-size:0.65rem;color:var(--text-dim);margin-bottom:0.15rem;white-space:pre-wrap;"><b>Prompt:</b> ${esc(c.userPrompt)}</div>
+          <div style="font-size:0.65rem;color:var(--accent2);"><b>Antwort:</b> ${c.response !== null ? esc(c.response) : '—'}</div>`;
+      } else {
+        // Groq-Übersetzungsaufruf — bei Debug: System-Prompt in Sub-details, User-Prompt direkt sichtbar
+        const systemBlock = _isDebug && c.systemPrompt ? `
+          <details style="margin-bottom:0.3rem;">
+            <summary style="font-size:0.63rem;color:var(--text-dimmer);cursor:pointer;user-select:none;">System-Prompt</summary>
+            <div style="font-size:0.63rem;color:var(--text-dim);white-space:pre-wrap;margin-top:0.2rem;padding:0.3rem 0.4rem;background:var(--bg);border-radius:5px;border:1px solid var(--border);">${esc(c.systemPrompt)}</div>
+          </details>` : '';
+        const userBlock = _isDebug && c.userPrompt ? `
+          <div style="font-size:0.65rem;margin-bottom:0.2rem;">
+            <span style="color:var(--text-dimmer);">User-Prompt:</span>
+            <div style="color:var(--text);white-space:pre-wrap;margin-top:0.15rem;padding:0.3rem 0.4rem;background:var(--bg);border-radius:5px;border:1px solid var(--border);font-size:0.63rem;">${esc(c.userPrompt)}</div>
+          </div>` :
+          `<div style="font-size:0.65rem;color:var(--text-dim);margin-bottom:0.15rem;"><b>System:</b> ${esc(c.systemPrompt)}</div>
+           <div style="font-size:0.65rem;color:var(--text);white-space:pre-wrap;margin-bottom:0.15rem;"><b>User:</b> ${esc(c.userPrompt)}</div>`;
+        body = systemBlock + userBlock + `
+          <div style="font-size:0.65rem;color:var(--accent2);white-space:pre-wrap;"><b>→ Antwort:</b> ${c.response !== null ? esc(c.response) : '—'}</div>`;
+      }
+
+      return `<div style="margin-bottom:0.6rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border);">
+        <div style="color:var(--accent3);font-size:0.68rem;margin-bottom:0.3rem;font-weight:600;">${header}</div>
         ${body}
       </div>`;
     }).join('');
     const hasGoogle = groqCalls.some(c => c.engine === 'google');
-    const hasGroq = groqCalls.some(c => c.engine !== 'google');
+    const hasGroq = groqCalls.some(c => c.engine !== 'google' && c.engine !== 'groq-eval');
     const hasEval = groqCalls.some(c => c.engine === 'groq-eval');
     const label = hasGoogle && hasGroq ? '🔵🟣' : hasGoogle ? '🔵 Google' : hasEval ? '🟣⭐ Groq' : '🟣 Groq';
     groqDebugBlock = `
-      <details class="groq-debug-details" style="margin-top:0.4rem;">
+      <details class="groq-debug-details" style="margin-top:0.4rem;"${_isDebug ? ' open' : ''}>
         <summary style="font-size:0.68rem;font-family:'DM Mono',monospace;color:var(--text-dimmer);cursor:pointer;user-select:none;">${label} Übersetzungs-Aufrufe (${groqCalls.length})</summary>
         <div style="margin-top:0.4rem;padding:0.5rem;background:var(--surface2);border-radius:8px;border:1px solid var(--border);font-family:'DM Mono',monospace;line-height:1.5;">
           ${callsHtml}
@@ -3861,24 +4390,67 @@ function addLogEntry(who, original, translated, fromLang, toLang, fragments = nu
         <span class="lat-label">Gesamt</span>
         <span class="lat-cur lat-total">${fmt(c.total)}</span><span class="lat-sep">/</span><span class="lat-avg lat-total">⌀${fmt(a.total)}</span>
       </div>`;
-    state.lastLatency = null; // einmal verbraucht
   }
 
   const entry = document.createElement('div');
   entry.className = `log-entry ${who}`;
-  entry.innerHTML = `
-    <div class="log-entry-avatar">${who === 'me' ? '😊' : '👤'}</div>
-    <div class="log-entry-content">
-      ${sttLine}
-      <div class="log-entry-original">${langNames[fromLang] || fromLang}: ${originalDisplay}</div>
-      <div class="log-entry-translated"><span style="color:var(--text-dimmer);font-size:0.72rem;font-family:'DM Mono',monospace;margin-right:0.3rem;">${langNames[toLang] || toLang}:</span>→ ${translatedDisplay}</div>
-      ${fullTransLine}
-      <div class="log-entry-meta">${time} · ${langNames[fromLang] || fromLang} → ${langNames[toLang] || toLang} · ${engine} · 🔊 ${voiceShort} · ⏱${state.debounceMs}ms · ${state.interimMode ? `⚡Interim ${state.interimWordCount}W` : 'Interim aus'} · 🔗 ${(state.roomId || '—')}</div>
-      ${latencyMeta}
-      ${ttsDebugBlock}
-      ${groqDebugBlock}
-    </div>
-  `;
+  const level = state.logLevel || 'chat';
+
+  // Avatar + Hintergrundfarbe — deterministisch via Peer-ID-Hash, konsistent für alle Teilnehmer
+  const _effectivePeerId = peerId || (who === 'me' ? peer?.id : null);
+  let avatar, avatarBg = '';
+  if (_effectivePeerId) {
+    const d = _peerAvatarData(_effectivePeerId);
+    avatar = d.avatar;
+    avatarBg = `background:${d.bg};`;
+  } else {
+    avatar = who === 'me' ? '😊' : '👤';
+  }
+  const avatarDiv = `<div class="log-entry-avatar" style="${avatarBg}">${avatar}</div>`;
+
+  let innerHtml;
+  if (level === 'chat') {
+    // ── Gespräch: nur Avatar + Text (kein Sprachlabel) ──
+    const chatText = who === 'me'
+      ? original
+      : (translated || translatedFull || original);
+    innerHtml = `
+      ${avatarDiv}
+      <div class="log-entry-content">
+        <div class="log-entry-translated"><span style="color:var(--text-dimmer);font-family:'DM Mono',monospace;font-size:0.72rem;margin-right:0.2rem;">${timestamp}</span><span style="color:var(--text);font-weight:700;margin-right:0.35rem;display:inline-block;${who === 'me' ? '' : 'transform:scaleX(-1);'}">➜</span>${chatText}</div>
+      </div>`;
+  } else if (level === 'info') {
+    // ── Info: Fragmente + Übersetzung + Meta-Zeile + Latenz ──
+    const fmt = ms => ms > 0 ? ms + 'ms' : '—';
+    const latInfo = state.lastLatency
+      ? ` · ⏱ ${fmt(state.lastLatency.cur.total)}`
+      : '';
+    innerHtml = `
+      ${avatarDiv}
+      <div class="log-entry-content">
+        <div class="log-entry-original">${fromLangHtml}: ${originalDisplay}</div>
+        <div class="log-entry-translated"><span style="color:var(--text-dimmer);font-size:0.72rem;font-family:'DM Mono',monospace;margin-right:0.3rem;">${langNames[toLang] || toLang}:</span>→ ${translatedDisplay}</div>
+        ${fullTransLine}
+        <div class="log-entry-meta">${time} · ${engine}${latInfo}</div>
+        ${latencyMeta}
+      </div>`;
+  } else {
+    // ── Debug: alles ──
+    innerHtml = `
+      ${avatarDiv}
+      <div class="log-entry-content">
+        ${sttLine}
+        <div class="log-entry-original">${fromLangHtml}: ${originalDisplay}</div>
+        <div class="log-entry-translated"><span style="color:var(--text-dimmer);font-size:0.72rem;font-family:'DM Mono',monospace;margin-right:0.3rem;">${langNames[toLang] || toLang}:</span>→ ${translatedDisplay}</div>
+        ${fullTransLine}
+        <div class="log-entry-meta">${time} · ${fromLangText} → ${langNames[toLang] || toLang} · ${engine} · 🔊 ${voiceShort} · ⏱${state.debounceMs}ms · ${state.interimMode ? `⚡Interim ${state.interimWordCount}W` : 'Interim aus'} · 🔗 ${(state.roomId || '—')}</div>
+        ${latencyMeta}
+        ${ttsDebugBlock}
+        ${groqDebugBlock}
+      </div>`;
+  }
+  entry.innerHTML = innerHtml;
+  state.lastLatency = null;
   log.appendChild(entry);
   entry.scrollIntoView({ behavior: 'smooth', block: 'end' });
 
@@ -3886,16 +4458,21 @@ function addLogEntry(who, original, translated, fromLang, toLang, fragments = nu
   if (!state.groqApiKey) state.groqApiKey = localStorage.getItem('lt_groq_apikey') || '';
   const qualityEvalActive = document.getElementById('qualityEval')?.checked && state.groqApiKey;
   if (qualityEvalActive && who === 'other') {
-    const qualDiv = document.createElement('div');
-    qualDiv.className = 'log-entry-quality';
-    qualDiv.innerHTML = '<span class="qual-loading">⏳ Bewerte Übersetzung...</span>';
-    entry.querySelector('.log-entry-content').appendChild(qualDiv);
+    const showInLog = (state.logLevel || 'chat') !== 'chat';
+
+    // qualDiv nur anhängen wenn nicht Chat-Level
+    const qualDiv = showInLog ? document.createElement('div') : null;
+    if (qualDiv) {
+      qualDiv.className = 'log-entry-quality';
+      qualDiv.innerHTML = '<span class="qual-loading">⏳ Bewerte Übersetzung...</span>';
+      entry.querySelector('.log-entry-content').appendChild(qualDiv);
+    }
 
     // Lokaler Call-Log für diesen Entry — nicht den globalen groqCallLog verwenden
     const entryCallLog = groqCalls ? groqCalls : [];
 
     groqEvaluate(original, translated, fromLang, toLang, translatedFull, entryCallLog).then(result => {
-      if (!result) { qualDiv.remove(); return; }
+      if (!result) { if (qualDiv) qualDiv.remove(); return; }
       const avg = arr => arr.length ? (arr.reduce((a,b)=>a+b,0)/arr.length).toFixed(1) : '—';
       const stars = n => '⭐'.repeat(Math.round(n)) + '☆'.repeat(5 - Math.round(n));
 
@@ -3903,7 +4480,7 @@ function addLogEntry(who, original, translated, fromLang, toLang, fragments = nu
       state.qualityScores.fluency.push(result.fluency);
       state.qualityScores.naturalness.push(result.naturalness);
 
-      // Live-Panel aktualisieren
+      // Live-Panel immer aktualisieren (unabhängig vom Log-Level)
       const qp = document.getElementById('qualityPanel');
       if (qp) qp.style.display = 'block';
       const setQ = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
@@ -3918,7 +4495,8 @@ function addLogEntry(who, original, translated, fromLang, toLang, fragments = nu
       setQ('ql_nat_cur',    result.naturalness + '/5');
       setQ('ql_nat_avg',    ' ⌀' + avgQ(state.qualityScores.naturalness));
 
-      qualDiv.innerHTML = `
+      // Log-Eintrag nur befüllen wenn nicht Chat-Level
+      if (qualDiv) qualDiv.innerHTML = `
         <span class="ql-label" title="Genauigkeit: wie treu ist die Übersetzung">Genau</span><span class="ql-stars">${stars(result.accuracy)}</span><span class="ql-val">${result.accuracy}/5</span><span class="ql-avg">⌀${avg(state.qualityScores.accuracy)}</span>
         <span class="ql-label" title="Flüssigkeit: wie natürlich klingt die Übersetzung">Flüssig</span><span class="ql-stars">${stars(result.fluency)}</span><span class="ql-val">${result.fluency}/5</span><span class="ql-avg">⌀${avg(state.qualityScores.fluency)}</span>
         <span class="ql-label" title="Natürlichkeit: wie muttersprachlich klingt es">Natürlich</span><span class="ql-stars">${stars(result.naturalness)}</span><span class="ql-val">${result.naturalness}/5</span><span class="ql-avg">⌀${avg(state.qualityScores.naturalness)}</span>
@@ -3932,15 +4510,17 @@ function addLogEntry(who, original, translated, fromLang, toLang, fragments = nu
           <span class="ql-label">Flüssig</span><span class="ql-stars">${stars(result.fullFluency)}</span><span class="ql-val">${result.fullFluency}/5</span>
           <span class="ql-label">Natürlich</span><span class="ql-stars">${stars(result.fullNaturalness)}</span><span class="ql-val">${result.fullNaturalness}/5</span>
         `;
-        entry.querySelector('.log-entry-content').appendChild(fullDiv);
-        if (result.fullComment) {
-          const fc = document.createElement('div');
-          fc.className = 'qual-comment';
-          fc.textContent = '💬 Komplett: ' + result.fullComment;
-          entry.querySelector('.log-entry-content').appendChild(fc);
+        if (showInLog) {
+          entry.querySelector('.log-entry-content').appendChild(fullDiv);
+          if (result.fullComment) {
+            const fc = document.createElement('div');
+            fc.className = 'qual-comment';
+            fc.textContent = '💬 Komplett: ' + result.fullComment;
+            entry.querySelector('.log-entry-content').appendChild(fc);
+          }
         }
       }
-      if (result.comment) {
+      if (result.comment && showInLog) {
         const commentEl = document.createElement('div');
         commentEl.className = 'qual-comment';
         commentEl.textContent = '💬 ' + (result.fullAccuracy !== undefined ? 'Fragmente: ' : '') + result.comment;
@@ -3977,8 +4557,7 @@ function addLogEntry(who, original, translated, fromLang, toLang, fragments = nu
 }
 
 function clearLog() {
-  document.getElementById('logEntries').innerHTML =
-    `<div style="color:var(--text-dimmer);font-family:'DM Mono',monospace;font-size:0.78rem;text-align:center;padding:1rem;">Protokoll geleert.</div>`;
+  document.getElementById('logEntries').innerHTML = '';
 }
 
 // ============================================================
@@ -4085,7 +4664,7 @@ Reply with ONLY valid JSON, no markdown:
 // ============================================================
 // MISC
 // ============================================================
-function hangUp() {
+function _resetSessionState() {
   stopMic();
   interimProcessing = false;
   interimPendingPromise = null;
@@ -4095,6 +4674,7 @@ function hangUp() {
   _guestPendingLog = null;
   _guestTtsPending.clear();
   _guestOrigFragments = [];
+  _guestLastOrigText = '';
   _guestTransFragments = [];
   _guestGroqCalls = [];
   _guestFinalTranslation = '';
@@ -4108,6 +4688,8 @@ function hangUp() {
   handleGeneration = 0;
   state.interimFragments = [];
   state.sttFragments = [];
+  _hostIncomingFragments = [];
+  _hostIncomingLastText = '';
   state.fullSentenceOriginal = '';
   state.lat = { stt:[], trans:[], tts:[], total:[] };
   state.lastLatency = null;
@@ -4124,14 +4706,48 @@ function hangUp() {
     try { state.currentAudio.stop(); } catch(e) {}
     state.currentAudio = null;
   }
-  guestConns.forEach(conn => { try { conn.close(); } catch(e) {} });
-  guestConns.clear();
-  if (peerConn) { peerConn.close(); peerConn = null; }
-  if (peer) { peer.destroy(); peer = null; }
   window.speechSynthesis.cancel();
   state.dataChannel = null;
+}
+
+function hangUp() {
+  if (state.isGuest) {
+    // Gast: Verbindung zum Host trennen, Raum bleibt bestehen
+    _resetSessionState();
+    if (peerConn) {
+      try { peerConn.send(JSON.stringify({ type: 'guest_leave' })); } catch(e) {}
+      peerConn.close(); peerConn = null;
+    }
+    if (peer) { peer.destroy(); peer = null; }
+    state.isGuest = false;
+  } else {
+    // Host: alles beenden, Raum schliessen
+    _resetSessionState();
+    guestConns.forEach(conn => { try { conn.close(); } catch(e) {} });
+    guestConns.clear();
+    if (peerConn) { peerConn.close(); peerConn = null; }
+    if (peer) { peer.destroy(); peer = null; }
+  }
   document.getElementById('setupSection').style.display = 'block';
   document.getElementById('mainInterface').classList.remove('visible');
+  // Startseite zurücksetzen: hostOffer, QR, Raum-Code verstecken
+  const hostOffer = document.getElementById('hostOffer');
+  if (hostOffer) hostOffer.classList.add('hidden');
+  const roomCodeDisplay = document.getElementById('roomCodeDisplay');
+  if (roomCodeDisplay) roomCodeDisplay.value = '';
+  const hostWaiting = document.getElementById('hostWaiting');
+  if (hostWaiting) hostWaiting.textContent = '⏳ Warte auf Gast...';
+  const qrEl = document.getElementById('qrcode');
+  if (qrEl) qrEl.innerHTML = '';
+  // Host-Tab aktiv setzen
+  document.querySelectorAll('.signal-tab').forEach(b => b.classList.remove('active'));
+  const hostTab = document.querySelector('.signal-tab');
+  if (hostTab) hostTab.classList.add('active');
+  document.querySelectorAll('.tab-content').forEach(p => p.classList.remove('active'));
+  const hostPanel = document.getElementById('hostPanel');
+  if (hostPanel) hostPanel.classList.add('active');
+  state.isGuest = false;
+  state.roomId = '';
 }
 
 function showToast(msg) {
@@ -4147,6 +4763,309 @@ if (window.speechSynthesis) {
   window.speechSynthesis.getVoices();
   window.speechSynthesis.onvoiceschanged = () => window.speechSynthesis.getVoices();
 }
+
+// Beim Tab-Schliessen: guest_leave synchron senden (Gast) oder Raum aufräumen (Host)
+window.addEventListener('beforeunload', () => {
+  if (state.isGuest && peerConn && peerConn.open) {
+    try { peerConn.send(JSON.stringify({ type: 'guest_leave' })); } catch(e) {}
+  }
+});
+</script>
+
+<!-- ── Hilfe-Modal ──────────────────────────────────────────────────────── -->
+<div id="helpModal" style="display:none;position:fixed;inset:0;z-index:9000;background:rgba(0,0,0,0.7);backdrop-filter:blur(4px);overflow-y:auto;">
+  <div style="max-width:820px;margin:2rem auto;background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:2rem 2.5rem;position:relative;color:var(--text);font-family:'DM Mono',monospace;font-size:0.82rem;line-height:1.65;">
+
+    <button onclick="closeHelp()" style="position:absolute;top:1.2rem;right:1.4rem;background:transparent;border:none;color:var(--text-dim);font-size:1.4rem;cursor:pointer;line-height:1;" title="Schliessen">✕</button>
+
+    <h2 style="font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800;margin-bottom:0.25rem;color:var(--text);">📖 LiveTranslate — Hilfe</h2>
+    <p style="color:var(--text-dim);margin-bottom:1.75rem;font-size:0.78rem;">Echtzeit-Sprachübersetzung für zwei oder mehr Teilnehmer · HTTPS erforderlich für Mikrofon-Zugriff</p>
+
+    <!-- ── Abschnitt: Einrichtung ── -->
+    <h3 style="font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;color:var(--accent);margin-bottom:0.75rem;border-bottom:1px solid var(--border);padding-bottom:0.4rem;">⚙️ Einrichtung</h3>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:1.5rem;">
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);min-width:160px;">🏠 Host / 🚪 Gast</td>
+        <td style="padding:0.45rem 0;">Der <b>Host</b> erstellt den Raum und wechselt sofort ins Hauptinterface. Der <b>Gast</b> gibt den Raum-Code ein und tritt bei. Übersetzung und TTS laufen auf dem Host.</td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Meine Sprache</td>
+        <td style="padding:0.45rem 0;">Sprache, die du sprichst. Standard: <b>🌐 Automatisch</b> — der Browser erkennt die Sprache selbst. Kann auf eine feste Sprache gesetzt werden. Wird als Quellsprache der Übersetzung verwendet.</td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Zielsprache</td>
+        <td style="padding:0.45rem 0;">Sprache, in die übersetzt und vorgelesen wird. Kann während der Session gewechselt werden.</td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Raum-Code &amp; QR</td>
+        <td style="padding:0.45rem 0;">Kurzer Code zum Beitreten. Der Host sieht in der oberen Leiste bis zu zwei QR-Codes (ein-/ausblendbar über ⚙): <b>🏠 Lokal</b> für Geräte im selben Netzwerk, <b>🌐 Extern</b> für Geräte ausserhalb — je mit ↗ öffnen und 📋 kopieren.</td>
+      </tr>
+      <tr style="vertical-align:top;">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Raum-Modus</td>
+        <td style="padding:0.45rem 0;">
+          <b>📢 Broadcast</b> — nur der Host spricht, Gäste hören zu.<br>
+          <b>🎙 Hub</b> — alle sprechen, Gäste hören nur den Host. <i>(Standard)</i><br>
+          <b>🔁 Konferenz</b> — alle Teilnehmer hören alle anderen.
+        </td>
+      </tr>
+    </table>
+
+    <!-- ── Abschnitt: Kopfzeile ── -->
+    <h3 style="font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;color:var(--accent);margin-bottom:0.75rem;border-bottom:1px solid var(--border);padding-bottom:0.4rem;">🎛️ Kopfzeile</h3>
+    <p style="color:var(--text-dim);font-size:0.78rem;margin-bottom:0.75rem;">Die obere Leiste zeigt von links nach rechts: Status · Raum-ID · Gästezahl · <b>✕ Beenden</b> · Raum-Modus-Dropdown · <b>⚙</b> · <b>?</b> · QR-Codes (wenn sichtbar).</p>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:1.5rem;">
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);min-width:160px;">Verbindungsstatus</td>
+        <td style="padding:0.45rem 0;">Farbiger Punkt mit Text: <b>grün</b> = verbunden, <b>gelb</b> = verbinde…, <b>rot</b> = Fehler. Daneben die Raum-ID und die Anzahl verbundener Gäste.</td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">✕ Beenden / Verlassen</td>
+        <td style="padding:0.45rem 0;"><b>Host – Beenden</b>: schliesst den Raum für alle, zurück zur Startseite.<br><b>Gast – Verlassen</b>: verlässt den Raum, der Host und andere Gäste bleiben aktiv. Gleiches passiert beim Schliessen des Browser-Tabs.</td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">📢 / 🎙 / 🔁 Dropdown</td>
+        <td style="padding:0.45rem 0;">Raum-Modus zur Laufzeit wechseln (nur Host sichtbar). Gäste übernehmen den Modus automatisch.</td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">⚙ Einstellungen</td>
+        <td style="padding:0.45rem 0;">Öffnet / schliesst das erweiterte Einstellungspanel (volle Breite, unterhalb der Kopfzeile). Enthält die selten geänderten Optionen — siehe Abschnitt <i>Einstellungspanel</i>.</td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">? Hilfe</td>
+        <td style="padding:0.45rem 0;">Öffnet dieses Hilfe-Fenster. Schliessen mit ✕ oder Escape-Taste.</td>
+      </tr>
+      <tr style="vertical-align:top;">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">QR-Codes (🏠 / 🌐)</td>
+        <td style="padding:0.45rem 0;">Erscheinen rechts in der Kopfzeile sobald der Raum aktiv ist (nur Host). Sichtbarkeit einzeln über ⚙ steuerbar. ↗ öffnet die URL im Browser, 📋 kopiert sie in die Zwischenablage.</td>
+      </tr>
+    </table>
+
+    <!-- ── Abschnitt: Einstellungspanel (⚙) ── -->
+    <h3 style="font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;color:var(--accent);margin-bottom:0.75rem;border-bottom:1px solid var(--border);padding-bottom:0.4rem;">⚙ Einstellungspanel</h3>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:1.5rem;">
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);min-width:160px;">Debounce (ms)</td>
+        <td style="padding:0.45rem 0;">Wartezeit nach dem letzten erkannten Wort, bevor der Satz übersetzt wird. Kleinere Werte = schnellere Reaktion, grössere Werte = stabilere Sätze. Wird vom Host an Gäste synchronisiert.</td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Dolmetscher-Modus</td>
+        <td style="padding:0.45rem 0;">Übersetzung und Sprachausgabe beginnen bereits während des Sprechens. Fragmente werden ab der eingestellten Wortanzahl gesendet. Wird vom Host an Gäste synchronisiert. <i>(Standard: aus)</i></td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Wörter (Anzahl)</td>
+        <td style="padding:0.45rem 0;">Anzahl neuer Wörter, ab der ein Interim-Fragment gesendet wird. Nur aktiv im Dolmetscher-Modus.</td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Qualitätsbewertung</td>
+        <td style="padding:0.45rem 0;">Groq AI bewertet nach jeder Übersetzung Genauigkeit, Flüssigkeit und Natürlichkeit (1–5 ⭐). Blendet das Qualitätspanel und die Latenzanzeige ein. <i>(Standard: aus)</i></td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Übersetzungs-Engine</td>
+        <td style="padding:0.45rem 0;"><b>🔵 Google</b>: schnell, präzise (~50 ms). <b>🟣 Groq AI</b>: Dolmetscher-Stil, kontextbewusst (~200–400 ms), benötigt Groq-API-Key.</td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Stimmqualität</td>
+        <td style="padding:0.45rem 0;">
+          <b>⭐⭐⭐ Neural2</b> — beste Qualität.<br>
+          <b>⭐⭐ WaveNet</b> — sehr natürlich.<br>
+          <b>⭐ Standard</b> — schnell &amp; günstig.<br>
+          <b>🌐 Browser TTS</b> — kostenlos, keine API nötig.
+        </td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Typewriter</td>
+        <td style="padding:0.45rem 0;">Blendet den Typewriter-Eingabebereich ein oder aus. <i>(Standard: aus)</i></td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Lokaler QR-Code</td>
+        <td style="padding:0.45rem 0;">Zeigt den QR-Code und Link für Gäste im selben Netzwerk (lokale IP-Adresse). <i>(Standard: ein)</i></td>
+      </tr>
+      <tr style="vertical-align:top;">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Externer QR-Code</td>
+        <td style="padding:0.45rem 0;">Zeigt den QR-Code und Link für Gäste ausserhalb des lokalen Netzwerks (öffentliche URL). Nur verfügbar wenn eine externe Basis-URL konfiguriert ist. <i>(Standard: aus)</i></td>
+      </tr>
+    </table>
+
+    <!-- ── Abschnitt: Bedienelemente im Hauptinterface ── -->
+    <h3 style="font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;color:var(--accent);margin-bottom:0.75rem;border-bottom:1px solid var(--border);padding-bottom:0.4rem;">🎛️ Bedienelemente</h3>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:1.5rem;">
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);min-width:160px;">🎤 Mikrofon-Knopf</td>
+        <td style="padding:0.45rem 0;">Startet / stoppt die Spracherkennung. Leuchtet rot wenn aktiv. Im Broadcast-Modus nur für den Host verfügbar.</td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Ich spreche — Sprache</td>
+        <td style="padding:0.45rem 0;">Dropdown neben dem Panel-Titel. Standard: <b>🌐 Automatisch</b>. Kann jederzeit geändert werden; bei «auto» wird die erkannte Sprache im Gesprächsprotokoll nachgetragen.</td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Stimme / 🔊</td>
+        <td style="padding:0.45rem 0;">Dropdown im «Ich höre»-Panel zur Auswahl der TTS-Stimme. Der Lautsprecher-Knopf spielt einen Testton ab.</td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">💬 / ℹ️ / 🐛 Log-Level</td>
+        <td style="padding:0.45rem 0;">Steuert die Detaillierung des Gesprächsprotokolls.<br>
+          <b>💬 Gespräch</b> — Zeitstempel + Text (ich spreche: Originalsprache; ich höre: Zielsprache). Kein Sprach-Label.<br>
+          <b>ℹ️ Info</b> — Sprachen, Fragmente, Übersetzung, Latenzen.<br>
+          <b>🐛 Debug</b> — alles inkl. Prompts, API-Aufrufe, TTS-Details. <i>(Standard: Gespräch)</i>
+        </td>
+      </tr>
+      <tr style="vertical-align:top;">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">🗑 Löschen</td>
+        <td style="padding:0.45rem 0;">Im Panel «Ich spreche»: löscht das Transkriptfeld. Im Panel «Ich höre»: löscht beide Textfelder (Original und Übersetzung).</td>
+      </tr>
+    </table>
+
+    <!-- ── Abschnitt: Typewriter ── -->
+    <h3 style="font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;color:var(--accent);margin-bottom:0.75rem;border-bottom:1px solid var(--border);padding-bottom:0.4rem;">⌨️ Typewriter</h3>
+    <p style="color:var(--text-dim);font-size:0.78rem;margin-bottom:0.75rem;">Einblendbar über ⚙ → Typewriter. Simuliert Live-Tippen durch zeichenweise Animation des eingegebenen Textes.</p>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:1.5rem;">
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);min-width:160px;">▶ / ⏸ Play/Pause</td>
+        <td style="padding:0.45rem 0;">Startet die Animation, pausiert sie (Position bleibt) oder setzt sie fort.</td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">⏹ Stop</td>
+        <td style="padding:0.45rem 0;">Bricht die Animation ab und setzt die Position auf den Anfang zurück.</td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">↵ Senden</td>
+        <td style="padding:0.45rem 0;">Sendet den kompletten Text sofort zur Übersetzung — ohne Animation.</td>
+      </tr>
+      <tr style="vertical-align:top;">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Geschwindigkeit (Z/s)</td>
+        <td style="padding:0.45rem 0;">Zeichen pro Sekunde für die Animation (1–20). Im Dolmetscher-Modus wird ab der eingestellten Wortanzahl bereits während der Animation übersetzt.</td>
+      </tr>
+    </table>
+
+    <!-- ── Abschnitt: Ausgabe-Elemente ── -->
+    <h3 style="font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;color:var(--accent);margin-bottom:0.75rem;border-bottom:1px solid var(--border);padding-bottom:0.4rem;">📺 Ausgabe-Elemente</h3>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:1.5rem;">
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);min-width:160px;">Ich spreche</td>
+        <td style="padding:0.45rem 0;">Zeigt das live erkannte Gesprochene oder den Typewriter-Text. Oben: Sprachauswahl und Mikrofon-Knopf. Unten: Transkriptfeld mit 🗑.</td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Ich höre — Original</td>
+        <td style="padding:0.45rem 0;">Originaltext des Gesprächspartners in dessen Sprache. Akkumuliert bis 🗑 geklickt wird.</td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Ich höre — Übersetzung</td>
+        <td style="padding:0.45rem 0;">Übersetzte Fragmente in der Zielsprache. Im Dolmetscher-Modus erscheinen Interim-Fragmente kursiv gedimmt, finale Fragmente normal. Wird laufend angehängt.</td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Latenz-Anzeige</td>
+        <td style="padding:0.45rem 0;">STT-, Übersetzungs- und TTS-Zeit sowie Gesamtlatenz — aktuell und als Durchschnitt. Einblendbar über ⚙ → Qualitätsbewertung.</td>
+      </tr>
+      <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Qualitätspanel (⭐)</td>
+        <td style="padding:0.45rem 0;">Aktuelle und durchschnittliche KI-Bewertung: Genauigkeit, Flüssigkeit, Natürlichkeit. Einblendbar über ⚙ → Qualitätsbewertung.</td>
+      </tr>
+      <tr style="vertical-align:top;">
+        <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">📋 Gesprächsprotokoll</td>
+        <td style="padding:0.45rem 0;">Chronologisches Log mit Zeitstempel (TT.MM.JJJJ HH:MM) pro Eintrag. Detail-Level über Dropdown wählbar (💬 / ℹ️ / 🐛).<br>
+          <b>💬 Gespräch</b>: «Ich spreche»-Einträge zeigen den Originaltext; «Ich höre»-Einträge zeigen den übersetzten Text.<br>
+          Im 🐛 Debug-Modus erscheinen Fragment-Separatoren:
+          <span style="color:var(--accent3);">|</span> Wort-Schwelle &nbsp;
+          <span style="color:var(--accent3);">{</span> Debounce-Ende &nbsp;
+          <span style="color:var(--accent3);">[</span> Intervall &nbsp;
+          <span style="color:var(--accent3);">&#92;</span> Einzel &nbsp;
+          <span style="color:var(--accent3);">&amp;</span> Multi &nbsp;
+          <span style="color:var(--accent3);">&gt;</span> STT-Interim &nbsp;
+          <span style="color:var(--accent3);">&lt;</span> STT-Debounce
+        </td>
+      </tr>
+    </table>
+
+    <!-- ── Abschnitt: Externe Dienste ── -->
+    <h3 style="font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;color:var(--accent);margin-bottom:0.75rem;border-bottom:1px solid var(--border);padding-bottom:0.4rem;">🌐 Externe Dienste</h3>
+    <table style="width:100%;border-collapse:collapse;margin-bottom:0.5rem;">
+      <thead>
+        <tr style="border-bottom:1px solid var(--border);">
+          <th style="text-align:left;padding:0.35rem 0.75rem 0.35rem 0;color:var(--text-dimmer);font-weight:600;min-width:180px;">Dienst</th>
+          <th style="text-align:left;padding:0.35rem 0.75rem 0.35rem 0;color:var(--text-dimmer);font-weight:600;min-width:200px;">Was ist es?</th>
+          <th style="text-align:left;padding:0.35rem 0;color:var(--text-dimmer);font-weight:600;">Verwendung in LiveTranslate</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+          <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Google Cloud Translation</td>
+          <td style="padding:0.45rem 0.75rem 0.45rem 0;">Maschineller Übersetzungsdienst von Google. Unterstützt über 100 Sprachen.</td>
+          <td style="padding:0.45rem 0;">Übersetzt erkannte Sprache in die Zielsprache (Engine «Google»).</td>
+        </tr>
+        <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+          <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Google Cloud Text-to-Speech</td>
+          <td style="padding:0.45rem 0.75rem 0.45rem 0;">KI-Stimmensynthese von Google (Neural2, WaveNet, Standard).</td>
+          <td style="padding:0.45rem 0;">Liest die Übersetzung in der Zielsprache vor. Stimme und Qualität sind wählbar.</td>
+        </tr>
+        <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+          <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Web Speech API (Browser)</td>
+          <td style="padding:0.45rem 0.75rem 0.45rem 0;">Eingebaute Browser-API für Spracherkennung und -synthese. Kostenlos.</td>
+          <td style="padding:0.45rem 0;">Spracherkennung (STT) des Mikrofons. Optionale Browser-TTS als Fallback.</td>
+        </tr>
+        <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+          <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Groq AI (LLaMA-3.3-70b)</td>
+          <td style="padding:0.45rem 0.75rem 0.45rem 0;">Sehr schnelle LLM-Inferenz-API von Groq.</td>
+          <td style="padding:0.45rem 0;">Dolmetscher-Stil-Übersetzung mit Kontext sowie KI-Qualitätsbewertung.</td>
+        </tr>
+        <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+          <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">PeerJS / WebRTC</td>
+          <td style="padding:0.45rem 0.75rem 0.45rem 0;">Peer-to-Peer-Verbindungsbibliothek über WebRTC. PeerJS Cloud für den Verbindungsaufbau (Signaling).</td>
+          <td style="padding:0.45rem 0;">Direkte Datenübertragung zwischen Host und Gästen ohne eigenen Server. Heartbeat erkennt Verbindungsunterbrüche.</td>
+        </tr>
+        <tr style="vertical-align:top;border-bottom:1px solid var(--border);">
+          <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">QRCode.js</td>
+          <td style="padding:0.45rem 0.75rem 0.45rem 0;">Clientseitige QR-Code-Generierung.</td>
+          <td style="padding:0.45rem 0;">QR-Codes für Lokal- und Extern-URL, damit Gäste per Handy beitreten.</td>
+        </tr>
+        <tr style="vertical-align:top;">
+          <td style="padding:0.45rem 0.75rem 0.45rem 0;white-space:nowrap;color:var(--accent3);">Google Fonts</td>
+          <td style="padding:0.45rem 0.75rem 0.45rem 0;">Web-Font-Hosting per CDN.</td>
+          <td style="padding:0.45rem 0;"><i>Syne</i> (Überschriften) und <i>DM Mono</i> (Labels, Transkripte).</td>
+        </tr>
+      </tbody>
+    </table>
+
+  </div>
+</div>
+<script>
+// ── Log-Level ────────────────────────────────────────────────
+function setLogLevel(level) {
+  state.logLevel = level;
+  localStorage.setItem('lt_log_level', level);
+  const legend = document.getElementById('logLegend');
+  if (legend) legend.style.display = level === 'debug' ? '' : 'none';
+}
+
+// ── Panel-Löschfunktionen ─────────────────────────────────────
+function clearMyPanel() {
+  const t = document.getElementById('myTranscript');
+  if (t) t.innerHTML = '<span class="placeholder">Mikrofon drücken und sprechen...</span>';
+  stopTypewriterFull();
+  _textInputLogFragments = [];
+  _textInputSentWordCount = 0;
+  _textInputLastSentText = '';
+  state.latencyStart = 0;
+  document.getElementById('logEntries')?.querySelector('.text-input-pending')?.remove();
+}
+
+function clearOtherPanel() {
+  const orig = document.getElementById('incomingOriginal');
+  if (orig) orig.innerHTML = '<span class="placeholder">Warte auf Nachricht...</span>';
+  const trans = document.getElementById('incomingTranslation');
+  if (trans) trans.innerHTML = '<span style="color:var(--text-dimmer);font-style:italic;font-size:0.82rem;">Übersetzung erscheint hier...</span>';
+}
+
+// ── Hilfe-Modal ──────────────────────────────────────────────
+function showHelp() {
+  document.getElementById('helpModal').style.display = 'block';
+}
+function closeHelp() {
+  document.getElementById('helpModal').style.display = 'none';
+}
+// ESC schliesst das Modal
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeHelp();
+});
 </script>
 </body>
 </html>
